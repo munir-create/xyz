@@ -1,0 +1,79 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Paired 7/28-Day Strength Model</title>
+<style>
+@page { size: A4; margin: 14mm 13mm; }
+body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 8.6pt; color: #16191d; line-height: 1.38; }
+h1 { font-size: 16pt; margin: 0 0 2px; } h2 { font-size: 11pt; margin: 14px 0 5px; border-bottom: 1px solid #c3c8cf; padding-bottom: 2px; }
+.sub { color: #4b5058; margin: 0 0 8px; } .small { font-size: 7.6pt; color: #4b5058; }
+.fcard { border-left: 3px solid #2a78d6; padding: 3px 8px; margin: 4px 0; background: #f4f6f8; break-inside: avoid; }
+.eq { font-family: "DejaVu Sans Mono", monospace; font-size: 7.6pt; background: #f4f6f8; padding: 4px 6px; margin: 3px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 7.3pt; margin: 6px 0; break-inside: avoid; }
+th, td { border-bottom: 1px solid #dde1e6; padding: 2px 4px; text-align: left; } th { background: #eef1f4; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.fig { break-inside: avoid; margin: 6px 0; } .fig img { width: 100%; }
+.strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 6px 0; }
+.strip div { background: #f4f6f8; padding: 4px 6px; } .strip .lab { display: block; font-size: 7pt; color: #4b5058; }
+.strip .val { display: block; font-size: 11pt; font-weight: bold; } .strip .sub { font-size: 6.8pt; margin: 0; }
+.chip { font-size: 7pt; } .tw { overflow: visible; }
+caption { text-align: left; }
+</style></head><body>
+<h1>Paired 7/28-day compressive-strength model</h1>
+<p class="sub">30 mixtures × 2 curing ages · linear mixed model (random mixture intercept, age-specific residual variance) · corrected data set · generated 2026-09-28</p>
+<h2>Findings</h2><div class="fcard"><b>Robust</b> · <b>Strength rises with SS to a peak at mid-range SS, at both ages</b><br>SS and SS² are the largest terms (p < 0.001, p < 0.001) and are kept in at least 99 % of re-selections. The peak lies at SS 58 % (7 d) and 61 % (28 d) for uncarbonated mixes at RCF 30 %, and lower (SS 46 % at 7 d, 38 % at 28 d) for carbonated mixes at RCF 50 %.</div><div class="fcard"><b>Robust</b> · <b>The 7 → 28-day gain is set by SS</b><br>f<sub>28</sub>/f<sub>7</sub> = 2.92 (95 % CI 2.44–3.49) at SS 0 %, falls to a minimum of 1.45 near SS 55 % and is 1.58 (1.24–2.01) at SS 75 % (SS × Age p < 0.001). NaOH-only mixes gain most. SS is the only age-dependent variable in 86 % of residual-bootstrap and 91 % of subsample re-selections. The curvature of the gain (SS² × Age, p = 0.017) is moderate.</div><div class="fcard"><b>Moderate</b> · <b>Carbonated RCF helps in NaOH-rich mixes and hurts in silicate-rich ones</b><br>Carbonated × SS p < 0.001. At RCF 50 % and SS 0 % a 1 h carbonated mix is ×1.55 (95 % CI 1.18–2.05; p = 0.003) the uncarbonated one; at RCF 10 % and SS 75 % it is ×0.53 (95 % CI 0.40–0.72; p < 0.001). The crossover SS rises with RCF, from 5 % at RCF 10 % to 49 % at RCF 50 % (1 h). Kept in 97 % of residual-bootstrap but only 67 % of subsample re-selections: it rests on the 8 uncarbonated mixes.</div><div class="fcard"><b>Moderate</b> · <b>RCF raises strength when it is carbonated and when SS is low</b><br>Carbonated × RCF p = 0.024, RCF × SS p = 0.026. Going from 10 to 50 % RCF multiplies strength by ×2.08 (95 % CI 1.64–2.64; p < 0.001) for carbonated RCF at SS 0 %, and by ×0.91 (95 % CI 0.65–1.26; p = 0.55) for uncarbonated RCF at SS 75 %. RCF never lowers strength significantly. The case-bootstrap intervals of carbonated × RCF and RCF × SS include zero, so these two terms depend on a few mixtures.</div><div class="fcard"><b>Not detected</b> · <b>Carbonation duration (0.5, 1, 5 h): no difference detected</b><br>The three carbonated levels do not differ in level (p = 0.12); on/off coding fits about equally well (ΔAICc −1.13). Carbonation × age is not supported (p = 0.19). In the age-specific fit the 5 h level gains less than NC (×0.77, 95 % CI 0.58–1.02; p = 0.069), a single contrast that the joint test does not support.</div><div class="fcard"><b>Not detected</b> · <b>A/B ratio (0.42–0.48): no effect detected</b><br>No A/B term improves the model at either age (A/B p = 0.68, (A/B)² p = 0.29, A/B × Age p = 0.31). A/B curvature is selected only if the 28-day variance is forced equal to the 7-day variance, and does not survive nested cross-validation.</div>
+<h2>Final model</h2>
+<p class="eq">ln f = 2.9551 + 0.0598·A + 0.6029·D + 0.0650·C<sub>0.5h</sub> − 0.0931·C<sub>1h</sub> + 0.0613·C<sub>5h</sub> − 0.1085·AD − 0.5249·D² + 0.1982·K·A − 0.3360·K·D + g·(0.4435 − 0.3059·D + 0.3208·D²)</p>
+<p class="eq">ln(f<sub>7</sub>) = 1.03971 + 0.0084169·RCF + 0.0610455·SS − 1.4469×10<sup>−4</sup>·RCF·SS − 4.8732×10<sup>−4</sup>·SS² + 0.103748·C[0.5 h] − 0.054418·C[1 h] + 0.100028·C[5 h] + 0.00991027·K·RCF − 0.00896104·K·SS</p><p class="eq">ln(f<sub>28</sub>) = 2.10988 + 0.0084169·RCF + 0.0357793·SS − 1.4469×10<sup>−4</sup>·RCF·SS − 2.5922×10<sup>−4</sup>·SS² + 0.103748·C[0.5 h] − 0.054418·C[1 h] + 0.100028·C[5 h] + 0.00991027·K·RCF − 0.00896104·K·SS</p><p class="eq">ln(f<sub>28</sub>/f<sub>7</sub>) = 1.07017 − 0.0252662·SS + 2.2811×10<sup>−4</sup>·SS²</p>
+
+<div class="strip">
+  <div><span class="lab">7 d · R²</span><span class="val">0.95</span><span class="sub">pred. R² 0.90 · RMSE 2.2 MPa</span></div>
+  <div><span class="lab">28 d · R²</span><span class="val">0.34</span><span class="sub">pred. R² 0.09 · RMSE 7.7 MPa</span></div>
+  <div><span class="lab">Residual scatter</span><span class="val">15 % / 34 %</span><span class="sub">7 d / 28 d (replicate 19 % / 20 %)</span></div>
+  <div><span class="lab">7 ↔ 28 d correlation</span><span class="val">0.49</span><span class="sub">within mixture (paired)</span></div>
+</div>
+<div class="tw"><table class="">
+<thead><tr><th class="">Term</th><th class="n">df</th><th class="n">F</th><th class="n">p</th><th class="n">Residual bootstrap</th><th class="n">Subsamples 24/30</th><th class="">Evidence</th></tr></thead><tbody>
+<tr><td class="">RCF</td><td class="n">1, 20.0</td><td class="n">0.83</td><td class="n">0.37</td><td class="n">100 %</td><td class="n">99 %</td><td class=""><span class="chip retained">Retained for hierarchy</span></td></tr>
+<tr><td class="">SS</td><td class="n">1, 26.3</td><td class="n">65.78</td><td class="n">< 0.001</td><td class="n">100 %</td><td class="n">100 %</td><td class=""><span class="chip robust">Robust</span></td></tr>
+<tr><td class="">Carbonation (4 levels)</td><td class="n">3, 20.0</td><td class="n">1.59</td><td class="n">0.22</td><td class="n">98 %</td><td class="n">71 %</td><td class=""><span class="chip retained">Retained for hierarchy</span></td></tr>
+<tr><td class="">RCF × SS</td><td class="n">1, 20.0</td><td class="n">5.83</td><td class="n">0.026</td><td class="n">82 %</td><td class="n">47 %</td><td class=""><span class="chip moderate">Moderate</span></td></tr>
+<tr><td class="">SS²</td><td class="n">1, 21.4</td><td class="n">28.66</td><td class="n">< 0.001</td><td class="n">100 %</td><td class="n">100 %</td><td class=""><span class="chip robust">Robust</span></td></tr>
+<tr><td class="">Carbonated × RCF</td><td class="n">1, 20.0</td><td class="n">5.96</td><td class="n">0.024</td><td class="n">81 %</td><td class="n">41 %</td><td class=""><span class="chip moderate">Moderate</span></td></tr>
+<tr><td class="">Carbonated × SS</td><td class="n">1, 20.0</td><td class="n">16.85</td><td class="n">< 0.001</td><td class="n">97 %</td><td class="n">67 %</td><td class=""><span class="chip moderate">Moderate</span></td></tr>
+<tr><td class="">Age (28 vs 7 d)</td><td class="n">1, 27.0</td><td class="n">24.38</td><td class="n">< 0.001</td><td class="n">–</td><td class="n">–</td><td class=""><span class="chip design">Design factor</span></td></tr>
+<tr><td class="">SS × Age</td><td class="n">1, 27.0</td><td class="n">18.83</td><td class="n">< 0.001</td><td class="n">100 %</td><td class="n">100 %</td><td class=""><span class="chip robust">Robust</span></td></tr>
+<tr><td class="">SS² × Age</td><td class="n">1, 27.0</td><td class="n">6.44</td><td class="n">0.017</td><td class="n">75 %</td><td class="n">62 %</td><td class=""><span class="chip moderate">Moderate</span></td></tr>
+</tbody></table></div>
+<p class="small">Wald F tests, Satterthwaite df. Covariance UN: SD 0.153 (7 d), 0.327 (28 d), ρ = 0.49. Lack of fit: gain p = 0.35, level|gain p = 0.65. Box–Cox (final): λ = 0.13 (95 % CI −0.11 to 0.40). Exhaustive search of 53,105 models; ΔAICc to best CS model 4.9.</p>
+<div class="fig"><img src="../results/figures/F03_gain_ratio_vs_SS.png"></div>
+<div class="fig"><img src="../results/figures/F05_strength_vs_SS_by_age.png"></div>
+<h2>Age-specific effects</h2><div class="tw"><table class="">
+<thead><tr><th class="">Term (coded)</th><th class="n">Effect at 7 d [95 % CI]</th><th class="n">Effect at 28 d [95 % CI]</th><th class="n">Change 7→28 d</th><th class="n">p (change)</th><th class="">Age term in final model</th></tr></thead><tbody>
+<tr><td class="">RCF</td><td class="n">0.060 [−0.077, 0.197]</td><td class="n">0.070 [−0.210, 0.349]</td><td class="n">0.010 [−0.230, 0.250]</td><td class="n">0.93</td><td class="">no (common effect)</td></tr>
+<tr><td class="">SS</td><td class="n">0.754 [0.619, 0.890]</td><td class="n">0.358 [0.082, 0.635]</td><td class="n">−0.396 [−0.633, −0.159]</td><td class="n">0.002</td><td class="">yes</td></tr>
+<tr><td class="">Carb 0.5 h</td><td class="n">0.065 [−0.141, 0.271]</td><td class="n">0.046 [−0.375, 0.467]</td><td class="n">−0.019 [−0.381, 0.343]</td><td class="n">0.91</td><td class="">no (common effect)</td></tr>
+<tr><td class="">Carb 1 h</td><td class="n">−0.094 [−0.253, 0.065]</td><td class="n">−0.163 [−0.488, 0.162]</td><td class="n">−0.069 [−0.348, 0.210]</td><td class="n">0.61</td><td class="">no (common effect)</td></tr>
+<tr><td class="">Carb 5 h</td><td class="n">0.057 [−0.105, 0.220]</td><td class="n">−0.205 [−0.537, 0.127]</td><td class="n">−0.262 [−0.548, 0.023]</td><td class="n">0.069</td><td class="">no (common effect)</td></tr>
+<tr><td class="">RCF·SS</td><td class="n">−0.107 [−0.201, −0.013]</td><td class="n">−0.015 [−0.207, 0.177]</td><td class="n">0.092 [−0.073, 0.257]</td><td class="n">0.26</td><td class="">no (common effect)</td></tr>
+<tr><td class="">SS²</td><td class="n">−0.684 [−0.837, −0.532]</td><td class="n">−0.307 [−0.619, 0.005]</td><td class="n">0.378 [0.109, 0.646]</td><td class="n">0.008</td><td class="">yes</td></tr>
+<tr><td class="">K·RCF</td><td class="n">0.196 [0.027, 0.366]</td><td class="n">0.079 [−0.267, 0.426]</td><td class="n">−0.117 [−0.414, 0.180]</td><td class="n">0.42</td><td class="">no (common effect)</td></tr>
+<tr><td class="">K·SS</td><td class="n">−0.334 [−0.505, −0.163]</td><td class="n">−0.206 [−0.556, 0.143]</td><td class="n">0.128 [−0.172, 0.427]</td><td class="n">0.39</td><td class="">no (common effect)</td></tr>
+</tbody></table></div>
+<div class="fig"><img src="../results/figures/F04_age_specific_effects.png"></div>
+<h2>Optima</h2><div class="tw"><table class="">
+<thead><tr><th class="">Age</th><th class="">Carbonation</th><th class="">Maximum at</th><th class="n">Median (MPa)</th><th class="n">95 % CI</th><th class="n">95 % PI (one batch)</th><th class="">Within 5 % of maximum</th><th class="n">Scaled pred. variance / design max</th></tr></thead><tbody>
+<tr><td class="">7 d</td><td class="">NC</td><td class="">RCF 10 %, SS 61.2 %</td><td class="n">19.0</td><td class="n">15.4–23.6</td><td class="n">13.0–28.0</td><td class="">RCF 10–50, SS 45–71</td><td class="n">0.45 / 0.60</td></tr>
+<tr><td class="">7 d</td><td class="">0.5 h</td><td class="">RCF 50 %, SS 46.0 %</td><td class="n">22.0</td><td class="n">17.4–27.8</td><td class="n">14.8–32.7</td><td class="">RCF 46–50, SS 36–56</td><td class="n">0.54 / 0.60</td></tr>
+<tr><td class="">7 d</td><td class="">1 h</td><td class="">RCF 50 %, SS 46.0 %</td><td class="n">18.8</td><td class="n">16.1–21.9</td><td class="n">13.2–26.8</td><td class="">RCF 46–50, SS 36–56</td><td class="n">0.24 / 0.60</td></tr>
+<tr><td class="">7 d</td><td class="">5 h</td><td class="">RCF 50 %, SS 46.0 %</td><td class="n">21.9</td><td class="n">18.2–26.4</td><td class="n">15.2–31.7</td><td class="">RCF 46–50, SS 36–56</td><td class="n">0.34 / 0.60</td></tr>
+<tr><td class="">28 d</td><td class="">NC</td><td class="">RCF 10 %, SS 66.2 %</td><td class="n">28.0</td><td class="n">21.3–36.7</td><td class="n">13.6–57.3</td><td class="">RCF 10–50, SS 43–75</td><td class="n">0.17 / 0.25</td></tr>
+<tr><td class="">28 d</td><td class="">0.5 h</td><td class="">RCF 50 %, SS 37.8 %</td><td class="n">33.1</td><td class="n">24.8–44.1</td><td class="n">16.1–68.3</td><td class="">RCF 46–50, SS 24–52</td><td class="n">0.19 / 0.25</td></tr>
+<tr><td class="">28 d</td><td class="">1 h</td><td class="">RCF 50 %, SS 37.8 %</td><td class="n">28.3</td><td class="n">22.2–35.9</td><td class="n">13.9–57.4</td><td class="">RCF 46–50, SS 24–52</td><td class="n">0.13 / 0.25</td></tr>
+<tr><td class="">28 d</td><td class="">5 h</td><td class="">RCF 50 %, SS 37.8 %</td><td class="n">33.0</td><td class="n">25.5–42.7</td><td class="n">16.2–67.3</td><td class="">RCF 46–50, SS 24–52</td><td class="n">0.15 / 0.25</td></tr>
+</tbody></table></div>
+<div class="fig"><img src="../results/figures/F06_response_surfaces.png"></div>
+<h2>Validation and robustness</h2>
+<p>Leave-one-mixture-out predicted R²: 0.90 (7 d), 0.09 (28 d); RMSE 2.2 / 7.7 MPa. Nested CV of the selection procedure: 0.87 / 0.03. Residual-bootstrap re-selection keeps SS as the only age-dependent variable in 86 % of resamples. Shapiro–Wilk p = 0.95; Breusch–Pagan p = 0.64; largest |t| 3.05 (mix 7, 28 d; Bonferroni p = 0.42).</p>
+<div class="fig"><img src="../results/figures/F08_observed_vs_predicted.png"></div>
+<div class="fig"><img src="../results/figures/F09_residual_diagnostics.png"></div>
+<div class="fig"><img src="../results/figures/F02_scale_and_selection.png"></div>
+<div class="fig"><img src="../results/figures/F10_robustness.png"></div>
+</body></html>
