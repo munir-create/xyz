@@ -52,6 +52,14 @@ python analysis/build_report.py          # needs Chromium for the PDF
 
 Seed 20260928. Tested with Python 3.11, NumPy 2.4.6, pandas 3.0.6.
 
+## Separate 7-day and 28-day models
+
+`analysis/run_separate.py` builds two independent models, one per curing age, each from its own 30 results with the same protocol
+(Box–Cox scale, the same 16-parameter candidate set, exhaustive AICc over 716 hierarchical models, identical validation and resampling).
+Outputs: `results/separate/` (JSON, tables `S7_*`, `S28_*`, figures `H01–H10`) and `report/separate/`
+(`index.html`, `Separate_Models_Summary.pdf`, `SEPARATE_MODELS.md`). Run `python analysis/run_separate.py`,
+`python analysis/make_figures_separate.py`, `python analysis/report_separate.py`.
+
 ## Relation to the earlier 7-day model
 
 The earlier 7-day model (numeric carbonation, 7-day data only) was used as a methodological and presentation reference.

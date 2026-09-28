@@ -1,0 +1,4 @@
+contrast,ratio,lo,hi,p,in_model
+1 h / 0.5 h,1.0,1.0,1.0,,False
+5 h / 0.5 h,1.0,1.0,1.0,,False
+5 h / 1 h,1.0,1.0,1.0,,False
