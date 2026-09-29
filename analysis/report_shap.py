@@ -1,0 +1,193 @@
+"""
+SHAP report: report/shap/index.html (published as an Artifact), report/shap/SHAP_Figures.pdf and
+report/shap/SHAP_NOTES.md, built from results/shap/shap_results.json and the figures.
+
+Run:  python analysis/report_shap.py
+"""
+from __future__ import annotations
+
+import glob
+import json
+import os
+import shutil
+import subprocess
+
+import numpy as np
+import pandas as pd
+
+import design as dz
+from build_report import CSS, SUMMARY_CSS, table
+
+RES = os.path.join(dz.ROOT, "results", "shap")
+REP = os.path.join(dz.ROOT, "report", "shap")
+os.makedirs(os.path.join(REP, "figures"), exist_ok=True)
+KEYS = ("7d", "28d", "paired")
+TITLE = {"7d": "7-day model", "28d": "28-day model", "paired": "Paired 7/28-day model"}
+
+
+def f2(x): return f"{x:.2f}"
+def f3(x): return f"{x:.3f}"
+
+
+def load():
+    with open(os.path.join(RES, "shap_results.json")) as f:
+        return json.load(f)
+
+
+def imp_table(R):
+    rows = []
+    for k in KEYS:
+        feats = R[k]["features"]
+        for j, fn in enumerate(feats):
+            m = R[k]["ln"]["mean_abs"][j]
+            rows.append({"model": TITLE[k], "feature": fn,
+                         "ln": "0 (not in model)" if m < 1e-12 else f"{m:.3f} [{R[k]['ln']['mean_abs_ci'][0][j]:.3f}–{R[k]['ln']['mean_abs_ci'][1][j]:.3f}]",
+                         "fac": "–" if m < 1e-12 else f"×{np.exp(m):.2f}",
+                         "MPa": "0" if m < 1e-12 else f"{R[k]['MPa']['mean_abs'][j]:.2f} [{R[k]['MPa']['mean_abs_ci'][0][j]:.2f}–{R[k]['MPa']['mean_abs_ci'][1][j]:.2f}]",
+                         "first": f"{100 * R[k]['ln']['rank_first_share'][j]:.0f} %"})
+    return pd.DataFrame(rows)
+
+
+def inter_table(R):
+    rows = []
+    for k in KEYS:
+        feats = R[k]["features"]
+        Mx = np.array(R[k]["ln"]["mean_abs_inter"])
+        for a in range(len(feats)):
+            for b in range(a + 1, len(feats)):
+                if Mx[a, b] > 1e-10:
+                    rows.append({"model": TITLE[k], "pair": f"{feats[a]} × {feats[b]}", "half": f"{Mx[a, b]:.3f}", "full": f"{2 * Mx[a, b]:.3f}",
+                                 "fac": f"×{np.exp(2 * Mx[a, b]):.2f}"})
+    return pd.DataFrame(rows)
+
+
+CAPTIONS = [
+    ("Z01_mean_abs_SHAP_importance", "Mean |SHAP| feature importance",
+     "Average absolute SHAP value of each input over the 30 mixtures (60 mixture × age rows for the paired model), on the ln-strength scale. "
+     "Whiskers: 95 % interval over 1,000 case-bootstrap refits stratified by carbonation level. The intervals are conditional on the selected "
+     "terms, so an input the model does not contain has zero importance by construction (A/B in the 7-day model, carbonation in the 28-day model)."),
+    ("Z02_SHAP_summary_beeswarm", "SHAP summary (beeswarm)",
+     "Each dot is one mixture: its horizontal position is the SHAP value of that input, the change in predicted ln strength (top axis: the "
+     "equivalent multiplicative factor on strength) relative to the average prediction. Colour gives the input's own value (blue low, red high); "
+     "carbonation is categorical and is shown by level. Inputs are ordered by mean |SHAP|."),
+    ("Z03_SHAP_dependence_7d_vs_28d", "SHAP dependence plots, 7-day and 28-day models on one scale",
+     "SHAP value of each input against its value, for every mixture. Vertical spread at a given input value comes from interactions with the "
+     "other inputs; the 28-day model is additive, so its points fall on single curves. Carbonation (right) is plotted by level, coloured by SS, "
+     "with the level mean as a bar."),
+    ("Z04_SHAP_interaction_matrices", "SHAP interaction matrices",
+     "Mean absolute SHAP interaction values. The diagonal is the main effect of each input; each off-diagonal cell holds one half of the pair's "
+     "interaction (the full pair effect is twice the cell). A zero cell means the model has no term linking the two inputs."),
+    ("Z05_SHAP_interaction_dependence", "SHAP interaction dependence plots",
+     "Full interaction effect (both halves) for the key pairs. a: carbonation raises strength at low SS and lowers it at high SS in the 7-day "
+     "model; b: RCF helps more when carbonated; c: RCF helps more at low SS; d: in the paired model the 28-day advantage is largest at low SS."),
+    ("Z06_SHAP_waterfalls_selected_mixes", "Waterfall decompositions (MPa)",
+     "Exact Shapley decomposition of each model's median prediction in MPa for four mixtures: the highest-strength mix (25), a weak NaOH-only mix "
+     "(29), a carbonated high-RCF NaOH-only mix (30) and a carbonated silicate-rich mix (27). E[f] is the mean prediction over the 30 mixtures."),
+    ("Z07_SHAP_paired_model_age", "Paired model: curing age",
+     "a: SHAP value of curing age against SS, showing that the 7 → 28-day contribution is largest in NaOH-only mixes; b: SHAP value of SS "
+     "coloured by age, showing the flatter SS response at 28 days; c: SHAP value of RCF by carbonation level."),
+    ("Z08a_mean_abs_SHAP_importance_MPa", "Supplementary: importance on the MPa scale", "As Z01, with SHAP values of the median prediction in MPa."),
+    ("Z08b_SHAP_summary_beeswarm_MPa", "Supplementary: summary on the MPa scale",
+     "As Z02, with SHAP values in MPa. On this scale the log-linear models are no longer additive, so even the 28-day model shows small interactions."),
+]
+
+
+def main():
+    R = load()
+    for fn in glob.glob(os.path.join(RES, "figures", "*.png")):
+        shutil.copy(fn, os.path.join(REP, "figures", os.path.basename(fn)))
+    it = imp_table(R)
+    ix = inter_table(R)
+    it_tab = table(it, ["model", "feature", "ln", "fac", "MPa", "first"],
+                   ["Model", "Input", "Mean |SHAP|, ln [95 % boot]", "Typical factor", "Mean |SHAP|, MPa [95 % boot]", "Ranked first in refits"],
+                   num=["ln", "fac", "MPa", "first"], cls="small")
+    ix_tab = table(ix, ["model", "pair", "half", "full", "fac"], ["Model", "Pair", "Mean |interaction|, per half", "Full pair effect", "Typical factor"],
+                   num=["half", "full", "fac"], cls="small")
+    cc = {k: R[k]["crosscheck"] for k in KEYS}
+    ccmax = max(max(c["max_abs_diff_values"], c["max_abs_diff_interactions"]) for c in cc.values())
+    imp = {k: dict(zip(R[k]["features"], R[k]["ln"]["mean_abs"])) for k in KEYS}
+    impM = {k: dict(zip(R[k]["features"], R[k]["MPa"]["mean_abs"])) for k in KEYS}
+    first = {k: dict(zip(R[k]["features"], R[k]["ln"]["rank_first_share"])) for k in KEYS}
+    I7 = np.array(R["7d"]["ln"]["mean_abs_inter"]); f7 = R["7d"]["features"]
+    Ip = np.array(R["paired"]["ln"]["mean_abs_inter"]); fp_ = R["paired"]["features"]
+
+    figs_html = "\n".join(
+        f'<figure class="plate" id="{fn}"><img src="figures/{fn}.png" alt="{t}" loading="lazy"><figcaption><b>{fn.split("_")[0]}. {t}.</b> {c}</figcaption></figure>'
+        for fn, t, c in CAPTIONS)
+    key_points = f"""
+<ul class="kp">
+  <li><b>7-day model.</b> SS dominates (mean |SHAP| {imp['7d']['SS']:.2f} on the ln scale, about {impM['7d']['SS']:.1f} MPa; ranked first in {100 * first['7d']['SS']:.0f} % of refits), followed by RCF ({imp['7d']['RCF']:.2f}) and carbonation ({imp['7d']['Carbonation']:.2f}). The largest interaction is SS × carbonation ({2 * I7[f7.index('SS'), f7.index('Carbonation')]:.3f} for the pair), then RCF × carbonation and RCF × SS ({2 * I7[f7.index('RCF'), f7.index('Carbonation')]:.3f} each). A/B is not in the model.</li>
+  <li><b>28-day model.</b> SS ({imp['28d']['SS']:.2f}), RCF ({imp['28d']['RCF']:.2f}) and A/B ({imp['28d']['A/B']:.2f}) are closer together; SS is ranked first in {100 * first['28d']['SS']:.0f} % of refits and RCF in {100 * first['28d']['RCF']:.0f} %. Carbonation is not in the model and the model has no interactions, so every interaction value is zero.</li>
+  <li><b>Paired model.</b> Curing age ({imp['paired']['Curing age']:.2f}) is almost as influential as SS ({imp['paired']['SS']:.2f}). Its only interaction is with SS ({2 * Ip[fp_.index('SS'), fp_.index('Curing age')]:.3f} for the pair): the 28-day advantage is largest in NaOH-only mixes.</li>
+</ul>"""
+    method = f"""
+<p>SHAP values here are exact interventional Shapley values of each fitted model, computed over all coalitions of its inputs (16 for four inputs, 32 with curing age) with the 30 real mixtures as the background set (60 mixture × age rows for the paired model). No sampling approximation is involved. The inputs are the actual model inputs: RCF (%), SS (%), A/B and carbonation. Carbonation is one categorical input with four levels (NC, 0.5 h, 1 h, 5 h). When it is absent from a coalition its level is taken from a background mixture, so its level indicators and its carbonated × RCF and carbonated × SS terms always move together. It is never treated as a number. The paired model adds curing age (7 or 28 d) as a fifth input. SHAP interaction values follow Lundberg et al. (2020).</p>
+<p>Values are computed on the ln-strength scale, where the models were fitted. On that scale the contributions add up exactly and the interaction values correspond one-to-one to the models' interaction terms. Axes also show the multiplicative factor exp(SHAP). The waterfalls and the supplementary figures use the MPa scale (median prediction). Checks: every decomposition satisfies Shapley efficiency to machine precision. The values agree with <code>shap.ExactExplainer</code> ({cc['7d']['shap_version']}) to within {ccmax:.1e} for values and interaction values. For the additive 28-day model they also equal the closed-form contributions (difference {R['28d']['analytic_check_max_diff']:.1e}). Importance intervals come from 1,000 case-bootstrap refits stratified by carbonation level ({R['paired']['n_boot']} usable for the paired model).</p>
+<p class="note">SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² 0.38 vs 0.91), so its SHAP pattern is less certain.</p>"""
+
+    body = f"""
+<header class="top">
+  <p class="eyebrow">Compressive strength · 7-day, 28-day and paired models · exact Shapley values</p>
+  <h1>SHAP Explanations</h1>
+  <p class="lede">How each finalised model uses its inputs: which inputs matter most, how the contribution of each input changes with its value, which inputs interact, and how individual predictions are built up. Carbonation is treated as one categorical input with four levels throughout.</p>
+  <p class="meta">Analysis: <code>analysis/run_shap.py</code> · figures: <code>analysis/make_figures_shap.py</code> · built {R['meta']['date']}</p>
+  <nav class="toc"><a href="#points">Key points</a><a href="#figures">Figures</a><a href="#tables">Tables</a><a href="#method">Method</a></nav>
+</header>
+<main>
+<section id="points"><h2>Key points</h2>{key_points}</section>
+<section id="figures"><h2>Figures</h2>{figs_html}</section>
+<section id="tables"><h2>Tables</h2><h3>Mean |SHAP| importance</h3>{it_tab}<h3>Non-zero interactions</h3>{ix_tab}
+<p class="note">Per-mixture SHAP values: <code>results/shap/tables/shap_values_*.csv</code>.</p></section>
+<section id="method"><h2>Method</h2>{method}</section>
+</main>"""
+    extra = """
+.kp { max-width: 80ch; padding-left: 20px; } .kp li { margin: 8px 0; }
+figure.plate figcaption { color: #3d4249; font-size: 13px; line-height: 1.5; padding: 8px 4px 2px; }
+"""
+    page = f"""<title>SHAP Explanations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>{CSS}{extra}</style>
+<div class="wrap">{body}</div>
+"""
+    with open(os.path.join(REP, "index.html"), "w") as f:
+        f.write(page)
+    print("wrote report/shap/index.html")
+
+    # PDF: one figure per page with caption
+    fig = "../../results/shap/figures"
+    pages = "".join(f'<div class="pg"><h2>{fn.split("_")[0]}. {t}</h2><img src="{fig}/{fn}.png"><p class="cap">{c}</p></div>' for fn, t, c in CAPTIONS)
+    doc = f"""<!doctype html><html><head><meta charset="utf-8"><title>SHAP Explanations</title><style>{SUMMARY_CSS}
+@page {{ size: A4 landscape; margin: 12mm; }} .pg {{ break-after: page; }} .pg img {{ width: 100%; max-height: 150mm; object-fit: contain; }}
+.cap {{ font-size: 9pt; color: #3d4249; }} .kp li {{ margin: 4px 0; }}</style></head><body>
+<div class="pg"><h1>SHAP explanations of the strength models</h1><p class="sub">7-day, 28-day and paired 7/28-day models · exact Shapley values · carbonation as a 4-level categorical input · {R['meta']['date']}</p>
+{key_points}{method}{it_tab}{ix_tab}</div>{pages}</body></html>"""
+    p = os.path.join(REP, "summary.html")
+    with open(p, "w") as f:
+        f.write(doc)
+    g = glob.glob("/opt/pw-browsers/chromium*/chrome-linux/chrome")
+    if g:
+        out = os.path.join(REP, "SHAP_Figures.pdf")
+        subprocess.run([g[0], "--headless", "--no-sandbox", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={out}", "file://" + p],
+                       check=False, capture_output=True, timeout=180)
+        print("wrote report/shap/SHAP_Figures.pdf" if os.path.exists(out) else "PDF not written")
+
+    import html as _h
+    import re
+    plain = lambda s: _h.unescape(re.sub(r"<[^>]+>", "", s))
+    md = ["# SHAP explanations of the strength models", "", "*Generated by `analysis/report_shap.py`.*", "", "## Key points", ""]
+    md += ["* " + plain(li) for li in re.findall(r"<li>(.*?)</li>", key_points, flags=re.S)]
+    md += ["", "## Method", ""] + [plain(p_) + "\n" for p_ in re.findall(r"<p[^>]*>(.*?)</p>", method, flags=re.S)]
+    md += ["## Mean |SHAP| importance", "", "| Model | Input | Mean abs SHAP, ln [95 % boot] | Typical factor | Mean abs SHAP, MPa | Ranked first |", "|---|---|---|---|---|---|"]
+    md += [f"| {r.model} | {r.feature} | {r.ln} | {r.fac} | {r.MPa} | {r.first} |" for r in it.itertuples()]
+    md += ["", "## Non-zero interactions (ln scale)", "", "| Model | Pair | Per half | Full pair | Factor |", "|---|---|---|---|---|"]
+    md += [f"| {r.model} | {r.pair} | {r.half} | {r.full} | {r.fac} |" for r in ix.itertuples()]
+    md += ["", "## Figures", ""] + [f"* `results/shap/figures/{fn}.png|pdf` — **{t}.** {c}" for fn, t, c in CAPTIONS]
+    with open(os.path.join(REP, "SHAP_NOTES.md"), "w") as f:
+        f.write("\n".join(md) + "\n")
+    print("wrote report/shap/SHAP_NOTES.md")
+
+
+if __name__ == "__main__":
+    main()

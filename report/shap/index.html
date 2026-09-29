@@ -1,0 +1,171 @@
+<title>SHAP Explanations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~72ch) with wider figure/table blocks; lab-report tone, cool concrete neutrals. */
+:root {
+  --bg: #f4f5f6; --surface: #ffffff; --ink: #15181c; --ink2: #474d55; --muted: #767d86; --rule: #d9dde2; --grid: #e4e7eb; --axis: #b9bfc7;
+  --accent: #1c5cab; --accent-soft: #e3edf9; --code: #eceff2;
+  --age7: #2a78d6; --age28: #eb6834; --nc: #3d3c39; --c05: #008300; --c1: #4a3aa7; --c5: #e87ba4; --star: #eda100;
+  --good: #0c7a0c; --good-bg: #e2f3e2; --mod: #8a5a00; --mod-bg: #fbefd5; --sugg: #5b4bb8; --sugg-bg: #ebe8fa; --none: #5d636b; --none-bg: #eceef0;
+  --seq0: #cde2fb; --seq1: #0d366b;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif; --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #101214; --surface: #181b1e; --ink: #edeff1; --ink2: #b8bdc4; --muted: #8b929b; --rule: #2b2f34; --grid: #262a2e; --axis: #3b4047;
+  --accent: #86b6ef; --accent-soft: #16273d; --code: #20242a;
+  --age7: #3987e5; --age28: #d95926; --nc: #c3c2b7; --c05: #008300; --c1: #9085e9; --c5: #d55181; --star: #eda100;
+  --good: #5fd35f; --good-bg: #173017; --mod: #f0b64a; --mod-bg: #33280f; --sugg: #b3a9f5; --sugg-bg: #25213f; --none: #a4aab2; --none-bg: #24282c;
+  --seq0: #0f2340; --seq1: #cde2fb; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #101214; --surface: #181b1e; --ink: #edeff1; --ink2: #b8bdc4; --muted: #8b929b; --rule: #2b2f34; --grid: #262a2e; --axis: #3b4047;
+  --accent: #86b6ef; --accent-soft: #16273d; --code: #20242a;
+  --age7: #3987e5; --age28: #d95926; --nc: #c3c2b7; --c05: #008300; --c1: #9085e9; --c5: #d55181; --star: #eda100;
+  --good: #5fd35f; --good-bg: #173017; --mod: #f0b64a; --mod-bg: #33280f; --sugg: #b3a9f5; --sugg-bg: #25213f; --none: #a4aab2; --none-bg: #24282c;
+  --seq0: #0f2340; --seq1: #cde2fb; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; }
+header.top { max-width: 820px; padding-block: 12px 18px; }
+.eyebrow { font: 500 12px/1.4 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+h1 { font: 800 clamp(30px, 5vw, 46px)/1.05 var(--f-display); font-stretch: 85%; letter-spacing: -.01em; margin: 0 0 14px; text-wrap: balance; }
+h2 { font: 700 26px/1.2 var(--f-display); font-stretch: 90%; margin: 0 0 12px; text-wrap: balance; }
+h3 { font: 650 17px/1.3 var(--f-display); margin: 26px 0 8px; text-wrap: balance; }
+.lede { font-size: 17.5px; color: var(--ink2); max-width: 68ch; margin: 0 0 12px; }
+.meta { font: 12.5px/1.5 var(--f-mono); color: var(--muted); margin: 0 0 16px; }
+code, .eq, pre { font-family: var(--f-mono); }
+code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: .88em; }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 16px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding-block: 9px; }
+.toc a { color: var(--ink2); text-decoration: none; font: 500 13.5px var(--f-body); }
+.toc a:hover, .toc a:focus-visible { color: var(--accent); text-decoration: underline; }
+main section { padding-block: 34px 8px; border-bottom: 1px solid var(--rule); }
+main p { max-width: 74ch; }
+.note { font-size: 13.5px; color: var(--ink2); }
+a { color: var(--accent); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin: 16px 0 20px; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; min-width: 0; }
+.card h3 { margin: 10px 0 6px; font-size: 16.5px; }
+.card p { font-size: 14px; color: var(--ink2); margin: 0; }
+.chip { display: inline-block; font: 600 11.5px/1 var(--f-mono); letter-spacing: .04em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.robust { color: var(--good); background: var(--good-bg); }
+.chip.moderate { color: var(--mod); background: var(--mod-bg); }
+.chip.suggestive { color: var(--sugg); background: var(--sugg-bg); }
+.chip.not, .chip.retained, .chip.design { color: var(--none); background: var(--none-bg); }
+.callout { background: var(--accent-soft); border-radius: 10px; padding: 14px 18px; margin: 8px 0 16px; }
+.callout h3 { margin-top: 2px; } .callout p { margin: 0; font-size: 14.5px; }
+.eq { background: var(--code); border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.7; overflow-x: auto; max-width: 100%; }
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 18px 0; }
+.strip > div { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.strip .lab { font: 500 12px var(--f-mono); color: var(--muted); letter-spacing: .03em; }
+.strip .val { font: 700 26px/1.1 var(--f-display); }
+.strip .sub { font-size: 12.5px; color: var(--ink2); }
+.tw { overflow-x: auto; margin: 10px 0 8px; max-width: 100%; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; background: var(--surface); }
+table.small { font-size: 12.5px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 600 12px/1.3 var(--f-body); color: var(--ink2); background: var(--surface); position: sticky; top: 0; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: .92em; white-space: nowrap; }
+details { margin: 10px 0; } summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+figure { margin: 18px 0; }
+figure.plate { background: #ffffff; border: 1px solid var(--rule); border-radius: 10px; padding: 10px; }
+figure.plate img { display: block; width: 100%; height: auto; }
+figure.chart { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 12px 8px; min-width: 0; }
+figcaption { font-size: 13px; color: var(--ink2); margin-top: 6px; }
+.plot { width: 100%; min-height: 260px; }
+.plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.plot text { fill: var(--ink2); font: 11.5px var(--f-body); }
+.plot .axis path, .plot .axis line { stroke: var(--axis); }
+.plot .grid line { stroke: var(--grid); }
+.plot .grid path { stroke: none; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 12px 0 4px; }
+.controls label { font-weight: 500; font-size: 14px; }
+input[type=range] { width: min(260px, 70vw); accent-color: var(--accent); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { font: 500 13px var(--f-body); color: var(--ink2); background: transparent; border: 0; border-right: 1px solid var(--rule); padding: 7px 12px; cursor: pointer; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-checked="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.split { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 820px) { .split { grid-template-columns: 1fr; } }
+.predictor { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; margin: 18px 0; }
+.predictor h3 { margin-top: 0; }
+.field { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 10px; margin: 8px 0; }
+.field input, .field select { font: 14px var(--f-body); padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.field input:focus-visible, .field select:focus-visible { outline: 2px solid var(--accent); }
+.pout { display: grid; gap: 10px; margin-top: 10px; }
+.pout .row { border-top: 1px solid var(--rule); padding-top: 8px; }
+.pout .big { font: 700 24px/1.1 var(--f-display); }
+.pout .k { font: 500 12px var(--f-mono); color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.pout .sw { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+.pout .d { font-size: 12.5px; color: var(--ink2); }
+ol.proto { padding-left: 22px; max-width: 78ch; } ol.proto li { margin: 6px 0; }
+pre.code { background: var(--code); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: 13px; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; font: 12.5px/1.45 var(--f-body); box-shadow: 0 4px 14px rgba(0,0,0,.12); max-width: 260px; }
+.tip b { font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink2); margin: 2px 0 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.plot .legend svg { flex: none; display: inline-block; width: 16px; height: 12px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.kp { max-width: 80ch; padding-left: 20px; } .kp li { margin: 8px 0; }
+figure.plate figcaption { color: #3d4249; font-size: 13px; line-height: 1.5; padding: 8px 4px 2px; }
+</style>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Compressive strength · 7-day, 28-day and paired models · exact Shapley values</p>
+  <h1>SHAP Explanations</h1>
+  <p class="lede">How each finalised model uses its inputs: which inputs matter most, how the contribution of each input changes with its value, which inputs interact, and how individual predictions are built up. Carbonation is treated as one categorical input with four levels throughout.</p>
+  <p class="meta">Analysis: <code>analysis/run_shap.py</code> · figures: <code>analysis/make_figures_shap.py</code> · built 2026-09-29</p>
+  <nav class="toc"><a href="#points">Key points</a><a href="#figures">Figures</a><a href="#tables">Tables</a><a href="#method">Method</a></nav>
+</header>
+<main>
+<section id="points"><h2>Key points</h2>
+<ul class="kp">
+  <li><b>7-day model.</b> SS dominates (mean |SHAP| 0.50 on the ln scale, about 4.6 MPa; ranked first in 99 % of refits), followed by RCF (0.15) and carbonation (0.08). The largest interaction is SS × carbonation (0.095 for the pair), then RCF × carbonation and RCF × SS (0.057 each). A/B is not in the model.</li>
+  <li><b>28-day model.</b> SS (0.17), RCF (0.14) and A/B (0.08) are closer together; SS is ranked first in 66 % of refits and RCF in 29 %. Carbonation is not in the model and the model has no interactions, so every interaction value is zero.</li>
+  <li><b>Paired model.</b> Curing age (0.34) is almost as influential as SS (0.36). Its only interaction is with SS (0.137 for the pair): the 28-day advantage is largest in NaOH-only mixes.</li>
+</ul></section>
+<section id="figures"><h2>Figures</h2><figure class="plate" id="Z01_mean_abs_SHAP_importance"><img src="figures/Z01_mean_abs_SHAP_importance.png" alt="Mean |SHAP| feature importance" loading="lazy"><figcaption><b>Z01. Mean |SHAP| feature importance.</b> Average absolute SHAP value of each input over the 30 mixtures (60 mixture × age rows for the paired model), on the ln-strength scale. Whiskers: 95 % interval over 1,000 case-bootstrap refits stratified by carbonation level. The intervals are conditional on the selected terms, so an input the model does not contain has zero importance by construction (A/B in the 7-day model, carbonation in the 28-day model).</figcaption></figure>
+<figure class="plate" id="Z02_SHAP_summary_beeswarm"><img src="figures/Z02_SHAP_summary_beeswarm.png" alt="SHAP summary (beeswarm)" loading="lazy"><figcaption><b>Z02. SHAP summary (beeswarm).</b> Each dot is one mixture: its horizontal position is the SHAP value of that input, the change in predicted ln strength (top axis: the equivalent multiplicative factor on strength) relative to the average prediction. Colour gives the input's own value (blue low, red high); carbonation is categorical and is shown by level. Inputs are ordered by mean |SHAP|.</figcaption></figure>
+<figure class="plate" id="Z03_SHAP_dependence_7d_vs_28d"><img src="figures/Z03_SHAP_dependence_7d_vs_28d.png" alt="SHAP dependence plots, 7-day and 28-day models on one scale" loading="lazy"><figcaption><b>Z03. SHAP dependence plots, 7-day and 28-day models on one scale.</b> SHAP value of each input against its value, for every mixture. Vertical spread at a given input value comes from interactions with the other inputs; the 28-day model is additive, so its points fall on single curves. Carbonation (right) is plotted by level, coloured by SS, with the level mean as a bar.</figcaption></figure>
+<figure class="plate" id="Z04_SHAP_interaction_matrices"><img src="figures/Z04_SHAP_interaction_matrices.png" alt="SHAP interaction matrices" loading="lazy"><figcaption><b>Z04. SHAP interaction matrices.</b> Mean absolute SHAP interaction values. The diagonal is the main effect of each input; each off-diagonal cell holds one half of the pair's interaction (the full pair effect is twice the cell). A zero cell means the model has no term linking the two inputs.</figcaption></figure>
+<figure class="plate" id="Z05_SHAP_interaction_dependence"><img src="figures/Z05_SHAP_interaction_dependence.png" alt="SHAP interaction dependence plots" loading="lazy"><figcaption><b>Z05. SHAP interaction dependence plots.</b> Full interaction effect (both halves) for the key pairs. a: carbonation raises strength at low SS and lowers it at high SS in the 7-day model; b: RCF helps more when carbonated; c: RCF helps more at low SS; d: in the paired model the 28-day advantage is largest at low SS.</figcaption></figure>
+<figure class="plate" id="Z06_SHAP_waterfalls_selected_mixes"><img src="figures/Z06_SHAP_waterfalls_selected_mixes.png" alt="Waterfall decompositions (MPa)" loading="lazy"><figcaption><b>Z06. Waterfall decompositions (MPa).</b> Exact Shapley decomposition of each model's median prediction in MPa for four mixtures: the highest-strength mix (25), a weak NaOH-only mix (29), a carbonated high-RCF NaOH-only mix (30) and a carbonated silicate-rich mix (27). E[f] is the mean prediction over the 30 mixtures.</figcaption></figure>
+<figure class="plate" id="Z07_SHAP_paired_model_age"><img src="figures/Z07_SHAP_paired_model_age.png" alt="Paired model: curing age" loading="lazy"><figcaption><b>Z07. Paired model: curing age.</b> a: SHAP value of curing age against SS, showing that the 7 → 28-day contribution is largest in NaOH-only mixes; b: SHAP value of SS coloured by age, showing the flatter SS response at 28 days; c: SHAP value of RCF by carbonation level.</figcaption></figure>
+<figure class="plate" id="Z08a_mean_abs_SHAP_importance_MPa"><img src="figures/Z08a_mean_abs_SHAP_importance_MPa.png" alt="Supplementary: importance on the MPa scale" loading="lazy"><figcaption><b>Z08a. Supplementary: importance on the MPa scale.</b> As Z01, with SHAP values of the median prediction in MPa.</figcaption></figure>
+<figure class="plate" id="Z08b_SHAP_summary_beeswarm_MPa"><img src="figures/Z08b_SHAP_summary_beeswarm_MPa.png" alt="Supplementary: summary on the MPa scale" loading="lazy"><figcaption><b>Z08b. Supplementary: summary on the MPa scale.</b> As Z02, with SHAP values in MPa. On this scale the log-linear models are no longer additive, so even the 28-day model shows small interactions.</figcaption></figure></section>
+<section id="tables"><h2>Tables</h2><h3>Mean |SHAP| importance</h3><div class="tw"><table class="small">
+<thead><tr><th class="">Model</th><th class="">Input</th><th class="n">Mean |SHAP|, ln [95 % boot]</th><th class="n">Typical factor</th><th class="n">Mean |SHAP|, MPa [95 % boot]</th><th class="n">Ranked first in refits</th></tr></thead><tbody>
+<tr><td class="">7-day model</td><td class="">RCF</td><td class="n">0.152 [0.088–0.216]</td><td class="n">×1.16</td><td class="n">1.37 [0.76–2.30]</td><td class="n">0 %</td></tr>
+<tr><td class="">7-day model</td><td class="">SS</td><td class="n">0.498 [0.428–0.557]</td><td class="n">×1.65</td><td class="n">4.59 [3.96–5.57]</td><td class="n">99 %</td></tr>
+<tr><td class="">7-day model</td><td class="">A/B</td><td class="n">0 (not in model)</td><td class="n">–</td><td class="n">0</td><td class="n">0 %</td></tr>
+<tr><td class="">7-day model</td><td class="">Carbonation</td><td class="n">0.082 [0.055–0.195]</td><td class="n">×1.09</td><td class="n">0.87 [0.60–2.59]</td><td class="n">1 %</td></tr>
+<tr><td class="">28-day model</td><td class="">RCF</td><td class="n">0.136 [0.055–0.220]</td><td class="n">×1.15</td><td class="n">2.60 [1.00–4.37]</td><td class="n">29 %</td></tr>
+<tr><td class="">28-day model</td><td class="">SS</td><td class="n">0.168 [0.089–0.253]</td><td class="n">×1.18</td><td class="n">3.25 [1.71–5.14]</td><td class="n">66 %</td></tr>
+<tr><td class="">28-day model</td><td class="">A/B</td><td class="n">0.083 [0.011–0.153]</td><td class="n">×1.09</td><td class="n">1.63 [0.22–2.98]</td><td class="n">5 %</td></tr>
+<tr><td class="">28-day model</td><td class="">Carbonation</td><td class="n">0 (not in model)</td><td class="n">–</td><td class="n">0</td><td class="n">0 %</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">RCF</td><td class="n">0.153 [0.080–0.228]</td><td class="n">×1.16</td><td class="n">2.06 [1.09–3.36]</td><td class="n">0 %</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">SS</td><td class="n">0.361 [0.280–0.439]</td><td class="n">×1.44</td><td class="n">4.31 [3.24–6.02]</td><td class="n">68 %</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">A/B</td><td class="n">0 (not in model)</td><td class="n">–</td><td class="n">0</td><td class="n">0 %</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">Carbonation</td><td class="n">0.083 [0.055–0.175]</td><td class="n">×1.09</td><td class="n">1.23 [0.82–3.02]</td><td class="n">0 %</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">Curing age</td><td class="n">0.338 [0.295–0.384]</td><td class="n">×1.40</td><td class="n">4.34 [3.50–5.83]</td><td class="n">32 %</td></tr>
+</tbody></table></div><h3>Non-zero interactions</h3><div class="tw"><table class="small">
+<thead><tr><th class="">Model</th><th class="">Pair</th><th class="n">Mean |interaction|, per half</th><th class="n">Full pair effect</th><th class="n">Typical factor</th></tr></thead><tbody>
+<tr><td class="">7-day model</td><td class="">RCF × SS</td><td class="n">0.028</td><td class="n">0.055</td><td class="n">×1.06</td></tr>
+<tr><td class="">7-day model</td><td class="">RCF × Carbonation</td><td class="n">0.028</td><td class="n">0.057</td><td class="n">×1.06</td></tr>
+<tr><td class="">7-day model</td><td class="">SS × Carbonation</td><td class="n">0.047</td><td class="n">0.095</td><td class="n">×1.10</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">RCF × SS</td><td class="n">0.028</td><td class="n">0.056</td><td class="n">×1.06</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">RCF × Carbonation</td><td class="n">0.029</td><td class="n">0.057</td><td class="n">×1.06</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">SS × Carbonation</td><td class="n">0.048</td><td class="n">0.095</td><td class="n">×1.10</td></tr>
+<tr><td class="">Paired 7/28-day model</td><td class="">SS × Curing age</td><td class="n">0.069</td><td class="n">0.137</td><td class="n">×1.15</td></tr>
+</tbody></table></div>
+<p class="note">Per-mixture SHAP values: <code>results/shap/tables/shap_values_*.csv</code>.</p></section>
+<section id="method"><h2>Method</h2>
+<p>SHAP values here are exact interventional Shapley values of each fitted model, computed over all coalitions of its inputs (16 for four inputs, 32 with curing age) with the 30 real mixtures as the background set (60 mixture × age rows for the paired model). No sampling approximation is involved. The inputs are the actual model inputs: RCF (%), SS (%), A/B and carbonation. Carbonation is one categorical input with four levels (NC, 0.5 h, 1 h, 5 h). When it is absent from a coalition its level is taken from a background mixture, so its level indicators and its carbonated × RCF and carbonated × SS terms always move together. It is never treated as a number. The paired model adds curing age (7 or 28 d) as a fifth input. SHAP interaction values follow Lundberg et al. (2020).</p>
+<p>Values are computed on the ln-strength scale, where the models were fitted. On that scale the contributions add up exactly and the interaction values correspond one-to-one to the models' interaction terms. Axes also show the multiplicative factor exp(SHAP). The waterfalls and the supplementary figures use the MPa scale (median prediction). Checks: every decomposition satisfies Shapley efficiency to machine precision. The values agree with <code>shap.ExactExplainer</code> (0.51.0) to within 1.9e-15 for values and interaction values. For the additive 28-day model they also equal the closed-form contributions (difference 9.2e-16). Importance intervals come from 1,000 case-bootstrap refits stratified by carbonation level (999 usable for the paired model).</p>
+<p class="note">SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² 0.38 vs 0.91), so its SHAP pattern is less certain.</p></section>
+</main></div>

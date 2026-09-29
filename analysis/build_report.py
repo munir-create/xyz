@@ -688,6 +688,16 @@ Outputs: `results/separate/` (JSON, tables `S7_*`, `S28_*`, figures `H01–H10`)
 (`index.html`, `Separate_Models_Summary.pdf`, `SEPARATE_MODELS.md`). Run `python analysis/run_separate.py`,
 `python analysis/make_figures_separate.py`, `python analysis/report_separate.py`.
 
+## SHAP explanations
+
+`analysis/run_shap.py` computes exact interventional Shapley (SHAP) values and SHAP interaction values for the separate
+7-day and 28-day models and the paired model, over all coalitions of the actual model inputs (RCF, SS, A/B, carbonation,
+plus curing age in the paired model), with the 30 mixtures as background. Carbonation is one categorical input with
+four levels (NC, 0.5 h, 1 h, 5 h). Importance intervals come from 1,000 stratified case-bootstrap refits.
+Outputs: `results/shap/` (JSON, tables, figures `Z01–Z08b`) and `report/shap/` (`index.html`, `SHAP_Figures.pdf`,
+`SHAP_NOTES.md`). Run `python analysis/run_shap.py`, `python analysis/make_figures_shap.py`,
+`python analysis/report_shap.py`. The optional cross-check against the `shap` package (0.51.0) runs only when it is installed.
+
 ## Relation to the earlier 7-day model
 
 The earlier 7-day model (numeric carbonation, 7-day data only) was used as a methodological and presentation reference.
