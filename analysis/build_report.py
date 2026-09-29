@@ -191,6 +191,19 @@ def main():
     ch_tab = table(ch, ["mix", "variable", "previous", "corrected", "change"], ["Mix", "Variable", "Previous 7-day file", "Corrected data set", "Change"],
                    {"previous": lambda v: f"{v:g}", "corrected": lambda v: f"{v:g}", "change": lambda v: minus(f"{v:+g}")},
                    num=["mix", "previous", "corrected", "change"], cls="small")
+    cmpd = pd.read_csv(os.path.join(dz.ROOT, "results", "tables", "T24_comparison_with_previous_data.csv"))
+    cmp_m = cmpd[cmpd.group.isin(["model", "term"])]
+    cmp_tab = table(cmp_m, ["quantity", "previous", "current"], ["Quantity", "Previous corrected data", "Current corrected data"],
+                    {"previous": minus, "current": minus}, num=["previous", "current"], cls="small")
+    cmp_o = cmpd[cmpd.group.isin(["optimum", "age"])]
+    cmp_tab2 = table(cmp_o, ["quantity", "previous", "current"], ["Quantity", "Previous corrected data", "Current corrected data"],
+                     {"previous": minus, "current": minus}, num=["previous", "current"], cls="small")
+    v1 = pd.read_csv(os.path.join(dz.ROOT, "results", "tables", "T00b_changes_vs_previous_corrected_data.csv"))
+    v1_tab = table(v1, ["mix", "variable", "previous", "corrected", "change"],
+                   ["Mix", "Variable", "Previous corrected data", "Current corrected data", "Change"],
+                   {"previous": lambda v: "–" if not np.isfinite(v) else f"{v:.2f}", "corrected": lambda v: "–" if not np.isfinite(v) else f"{v:.2f}",
+                    "change": lambda v: "–" if not np.isfinite(v) else minus(f"{v:+.2f}")},
+                   num=["mix", "previous", "corrected", "change"], cls="small")
     # bootstrap frequencies
     bf = pd.DataFrame([{"term": t, "lab": tlabel(t), "fin": "●" if t in final else "", "imp": R["search"]["UN"]["importance"][t],
                         "rb": R["bootstrap"]["resid"]["inclusion"][t], "sb": R["bootstrap"]["subsample"]["inclusion"][t],
@@ -267,13 +280,18 @@ def main():
          f"Carbonated × RCF {K['p_KA']}, RCF × SS {K['p_AD']}. Going from 10 to 50 % RCF multiplies strength by {K['rcf_c0']} for carbonated "
          f"RCF at SS 0 %, and by {K['rcf_nc75']} for uncarbonated RCF at SS 75 %." + (" RCF never lowers strength significantly." if K["rcf_never_lowers"] else "")
          + (f" The case-bootstrap intervals of {K['case_zero']} include zero, so these two terms depend on a few mixtures." if K["case_zero"] else "")),
-        (lvl("Carb.Age"), "Carbonation duration (0.5, 1, 5 h): no difference detected",
+        (lvl("Carb.Age"), "Carbonation duration (0.5, 1, 5 h): no difference in level; a smaller 28-day gain after 5 h is possible",
          f"The three carbonated levels do not differ in level ({K['p_dur']}); on/off coding fits about equally well "
-         f"(ΔAICc {K['dAICc_onoff']}). Carbonation × age is not supported ({K['add_Carb.Age']}). In the age-specific fit the 5 h level gains "
-         f"less than NC (×{K['c5_change']}, 95 % CI {K['c5_change_ci']}; {K['chg_Carb[5 h]']}), a single contrast that the joint test does not support."),
+         f"(ΔAICc {K['dAICc_onoff']}). Carbonation × age is {'suggestive but not selected' if K['add_Carb.Age_val'] < 0.10 else 'not supported'} "
+         f"(added-term {K['add_Carb.Age']}, ΔAICc {K['add_Carb.Age_dAICc']}). In the age-specific fit the 5 h level gains "
+         f"less than NC (×{K['c5_change']}, 95 % CI {K['c5_change_ci']}; {K['chg_Carb[5 h]']})"
+         + (", a single contrast that the joint test does not support." if K["add_Carb.Age_val"] >= 0.05 else ".")
+         + (f" The only mixes that do not gain strength from 7 to 28 days are 5 h mixes ({K['nogain_txt']})." if K["nogain_5h"] else "")),
         (lvl("C", "C2", "C.Age"), "A/B ratio (0.42–0.48): no effect detected",
          f"No A/B term improves the model at either age (A/B {K['add_C']}, (A/B)² {K['add_C2']}, A/B × Age {K['add_C.Age']}). "
-         f"A/B curvature is selected only if the 28-day variance is forced equal to the 7-day variance, and does not survive nested cross-validation."),
+         f"A/B curvature is selected only if the 28-day variance is forced equal to the 7-day variance (CS); under nested cross-validation "
+         f"that search predicts 7-day strength clearly worse (R² {K['ncv_cs7']} vs {K['ncv_primary7']}) for a small gain at 28 days "
+         f"({K['ncv_cs28']} vs {K['ncv_primary28']})."),
     ]
     card_html = "\n".join(
         f'<article class="card"><span class="chip {lvl.split()[0].lower()}">{lvl}</span><h3>{t}</h3><p>{body}</p></article>'
@@ -307,10 +325,10 @@ def main():
 <header class="top">
   <p class="eyebrow">Compressive strength · 30 mixtures tested at 7 and 28 days · linear mixed model</p>
   <h1>Paired 7/28-Day Strength Model</h1>
-  <p class="lede">One model for both curing ages, fitted to the corrected data set. Curing age is a two-level factor, carbonation a four-level factor, and the 7- and 28-day results of each mixture are treated as a correlated pair. The terms were chosen by an exhaustive search of {K['n_models']} hierarchical models and then validated before any effect was interpreted.</p>
+  <p class="lede">One model for both curing ages, fitted to the updated corrected results of the 30 mixes (see <a href="#changes">What changed</a>). Curing age is a two-level factor, carbonation a four-level factor, and the 7- and 28-day results of each mixture are treated as a correlated pair. The terms were chosen by an exhaustive search of {K['n_models']} hierarchical models and then validated before any effect was interpreted.</p>
   <p class="meta">Data: <code>data/strength_7d_28d_corrected.csv</code> · Analysis: <code>analysis/run_analysis.py</code> · {R['meta']['n_boot']:,} resamples per resampling scheme · built {R['meta']['date']}</p>
   <nav class="toc" aria-label="Sections">
-    <a href="#findings">Findings</a><a href="#model">Model</a><a href="#age">Age effect</a><a href="#surfaces">Surfaces &amp; predictor</a>
+    <a href="#findings">Findings</a><a href="#changes">What changed</a><a href="#model">Model</a><a href="#age">Age effect</a><a href="#surfaces">Surfaces &amp; predictor</a>
     <a href="#selection">Selection</a><a href="#validation">Validation</a><a href="#robustness">Robustness</a><a href="#data">Data</a><a href="#repro">Reproduce</a>
   </nav>
 </header>
@@ -322,8 +340,16 @@ def main():
   <div class="cards">{card_html}</div>
   <div class="callout">
     <h3>How far to trust 28-day predictions</h3>
-    <p>At 7 days the model predicts a left-out mixture with R² {K['pr7']} and an error of {K['rm7']} MPa, close to the {K['pe7M']} MPa scatter between replicate batches. At 28 days the residual scatter is {K['cv28']} (replicate batches {100*float(K['pe28']):.0f} %) and a left-out mixture is predicted with R² {K['pr28']} (RMSE {K['rm28']} MPa). Under nested cross-validation, where the selection is repeated in every fold, no procedure predicted 28-day strength of a new mixture with R² above {K['ncv_best28']} (primary procedure {K['ncv_primary28']}), and the procedures that did slightly better at 28 days did clearly worse at 7 days. The 28-day equation describes the expected trend well, since its terms are estimated jointly from both ages, but the strength of an individual new mixture at 28 days is uncertain by a factor of about {K['pi28']} either way (95 % prediction interval; {K['pi7']} at 7 days).</p>
+    <p>At 7 days the model predicts a left-out mixture with R² {K['pr7']} and an error of {K['rm7']} MPa, close to the {K['pe7M']} MPa scatter between replicate batches. At 28 days the residual scatter is {K['cv28']} (replicate batches {100*float(K['pe28']):.0f} %) and a left-out mixture is predicted with R² {K['pr28']} (RMSE {K['rm28']} MPa). Under nested cross-validation, where the selection is repeated in every fold, no procedure predicted 28-day strength of a new mixture with R² above {K['ncv_best28']} (primary procedure {K['ncv_primary28']}); the procedure that reached it ({K['ncv_best28_proc']}) predicted 7-day strength with R² {K['ncv_best28_7']} against {K['ncv_primary7']}. Weighting each mean by its specimen scatter does not help (see Robustness). The 28-day equation describes the expected trend well, since its terms are estimated jointly from both ages, but the strength of an individual new mixture at 28 days is uncertain by a factor of about {K['pi28']} either way (95 % prediction interval; {K['pi7']} at 7 days).</p>
   </div>
+</section>
+
+<section id="changes">
+  <h2>What changed with the corrected data</h2>
+  <p>{K['chg_intro']}</p>
+  {cmp_tab}
+  <details><summary>Optima and 7 → 28-day changes of each effect, previous vs current data</summary>{cmp_tab2}</details>
+  <p class="note">Previous: the same protocol (<code>analysis/run_analysis.py</code>) run on the previous corrected data set (<code>data/previous_corrected_v1.csv</code>); key results kept in <code>results/previous_v1/key_results.json</code>. Full table: <code>results/tables/T24_comparison_with_previous_data.csv</code>.</p>
 </section>
 
 <section id="model">
@@ -347,7 +373,7 @@ def main():
 
 <section id="age">
   <h2>How the response changes from 7 to 28 days</h2>
-  <p>Only SS changes its effect with age. Silicate-free (NaOH-only) mixes are weak at 7 days and nearly triple by 28 days (×{K['g0']}); silicate-rich mixes are relatively further along at 7 days and rise by about half as much (×{K['g75']} at SS 75 %). The gain at SS 0 % is {K['g0v75']} times the gain at SS 75 % (95 % CI {K['g0v75_ci']}; {K['g0v75_p']}). The apparent rise of the gain above SS {K['gmin_ss']} % is not significant ({K['g75vmin_p']}).</p>
+  <p>In the selected model only SS changes its effect with age. Silicate-free (NaOH-only) mixes are weak at 7 days and nearly triple by 28 days (×{K['g0']}); silicate-rich mixes are relatively further along at 7 days and rise by about half as much (×{K['g75']} at SS 75 %). The gain at SS 0 % is {K['g0v75']} times the gain at SS 75 % (95 % CI {K['g0v75_ci']}; {K['g0v75_p']}). The apparent rise of the gain above SS {K['gmin_ss']} % is not significant ({K['g75vmin_p']}).</p>
   <figure class="chart"><div id="gainChart" class="plot" role="img" aria-label="Strength gain ratio f28 over f7 against SS with model curve and observed mixtures"></div>
   <figcaption>Gain ratio f<sub>28</sub>/f<sub>7</sub> against SS. Line: model with 95 % CI (darker band) and 95 % case-bootstrap band (lighter band). Markers: observed mixtures by carbonation level. Hover a marker for its data.</figcaption></figure>
 
@@ -361,7 +387,7 @@ def main():
   <figcaption>Median predicted strength with 95 % CI. Markers are runs at the selected carbonation level within ±10 % RCF of the slider value. Open circles mark each curve's peak.</figcaption></figure>
 
   <h3>Does any other effect change with age?</h3>
-  <p>The same terms were refitted with every term interacting with age. RCF × SS, carbonated × RCF and carbonated × SS keep their sign from 7 to 28 days; their 28-day estimates are smaller and less precise, and none of the changes is significant (RCF × SS, carbonated × RCF, carbonated × SS: {K['chg_range_int']}; all omitted age terms jointly {K['omit_joint']}). The data are therefore consistent with the same proportional effects at both ages but cannot exclude a moderate weakening at 28 days.</p>
+  <p>The same terms were refitted with every term interacting with age. RCF × SS, carbonated × RCF and carbonated × SS keep their sign from 7 to 28 days; their 28-day estimates are smaller and less precise, and none of the changes is significant (RCF × SS, carbonated × RCF, carbonated × SS: {K['chg_range_int']}; all omitted age terms jointly {K['omit_joint']}). The data are therefore consistent with the same proportional effects at both ages but cannot exclude a moderate weakening at 28 days.{f" On its own, the 5 h carbonation level gains less than NC (×{K['c5_change']}, {K['chg_Carb[5 h]']}); the joint carbonation × age test gives {K['add_Carb.Age']}." if K['chg_c5_val'] < 0.05 else ""}</p>
   {ag_tab}
   <figure class="plate"><img src="figures/F04_age_specific_effects.png" alt="Forest plot of age-specific effects at 7 and 28 days" loading="lazy"></figure>
   <details><summary>Added-term tests for every omitted term</summary>{at_tab}</details>
@@ -394,7 +420,7 @@ def main():
 <section id="selection">
   <h2>Scale, pairing, coding and term selection</h2>
   <h3>Scale</h3>
-  <p>For the selected model Box–Cox gives {K['bc_final']}: ln is inside the interval and no transformation is rejected (LR {K['bc_LR1']}). The saturated candidate model gives {K['bc_full']}, just excluding 0; that interval includes 0 when any one of several mixtures is removed ({K['bc_del_inc0']} of 30 deletions). The analysis was repeated on the λ = −0.5 scale (see Robustness).</p>
+  <p>For the selected model Box–Cox gives {K['bc_final']}: ln is inside the interval and no transformation is rejected (LR {K['bc_LR1']}). The saturated candidate model gives {K['bc_full']}{f", just excluding 0; that interval includes 0 when any one of several mixtures is removed ({K['bc_del_inc0']} of 30 deletions)" if K['bc_full_excl0'] else f", which includes 0 ({K['bc_del_inc0']} of 30 single-mixture deletions keep 0 inside)"}. The analysis was repeated on the λ = −0.5 scale (see Robustness).</p>
   <h3>Pairing</h3>
   {cv_tab}
   <p class="note">Full candidate model, REML. UN vs CS: LR {K['cov_LR']}, {K['cov_p']}. Both structures were carried into the model search; the selected combination (UN) beats the best CS model by ΔAICc = {K['daicc_struct']}.</p>
@@ -403,7 +429,7 @@ def main():
   <p class="note">The on/off and log-duration codings fit marginally better (ΔAICc {K['dAICc_onoff']} and {K['dAICc_log']}), which is short of the pre-set threshold of 2. The log-duration model's better 28-day prediction disappears under nested cross-validation (7 d {K['ncv_log7']}, 28 d {K['ncv_log28']}). The 4-level coding is kept, as requested unless the data clearly favour another.</p>
   <h3>Term selection</h3>
   {top_tab}
-  <p class="note">Exhaustive search, UN covariance, top 10 of {K['n_models']}. The selected model has {int(R['search']['UN']['top'][0]['k'])} parameters and is {K['un2']} AICc units ahead of the next model. Backward elimination at α = 0.10 keeps more age interactions; at α = 0.05 it returns a subset of the final model. With each mixture deleted in turn the search returns the same model {K['del_same']} times out of 30.</p>
+  <p class="note">Exhaustive search, UN covariance, top 10 of {K['n_models']}. The selected model has {int(R['search']['UN']['top'][0]['k'])} parameters and is {K['un2']} AICc units ahead of the next model. Backward elimination at α = 0.10 {'keeps more age interactions' if K['be10_more_age'] else 'returns a different model'}; at α = 0.05 it {'returns the final model' if K['be05_same'] else ('returns a subset of the final model' if K['be05_subset'] else 'returns a different model')} (table T07). With each mixture deleted in turn the search returns the same model {K['del_same']} times out of 30.</p>
   <figure class="plate"><img src="figures/F02_scale_and_selection.png" alt="Box–Cox profile, term support and nested cross-validation" loading="lazy"></figure>
   <h3>Nested cross-validation of the selection procedures</h3>
   {ncv_tab}
@@ -416,13 +442,14 @@ def main():
   <div class="controls"><div class="seg" id="opSeg" role="radiogroup" aria-label="Prediction type"></div></div>
   <figure class="chart"><div id="opChart" class="plot" role="img" aria-label="Observed against predicted strength"></div>
   <figcaption>Observed against model strength (log axes). Hover a point for the mixture.</figcaption></figure>
-  <p>Whitened residuals are consistent with normality (Shapiro–Wilk {K['sw_p']}) and constant variance (against fitted value and age {K['bp_p']}; against the factors {K['bp2_p']}), with no trend over mix number (ρ = {K['run_rho']}, {K['run_p']}). The largest deleted studentized residual is {K['max_t']} (mix {K['max_t_mix']} at {K['max_t_age']} days: 35.5 MPa against about 15–17 MPa predicted), which is not an outlier after Bonferroni correction ({K['max_t_bonf']}). Mix {K['cook_mix']} has the largest influence (Cook's D {K['cook_max']}). Excluding either mixture leaves the selected model unchanged.</p>
+  <p>Whitened residuals are consistent with normality (Shapiro–Wilk {K['sw_p']}) and constant variance (against fitted value and age {K['bp_p']}; against the factors {K['bp2_p']}), with no trend over mix number (ρ = {K['run_rho']}, {K['run_p']}). The largest deleted studentized residual is {K['max_t']} (mix {K['max_t_mix']} at {K['max_t_age']} days: {K['max_t_obs']} MPa observed against {K['max_t_fit']} MPa fitted and {K['max_t_cv']} MPa predicted with the mixture left out), which is {'not an outlier' if K['max_t_bonf_val'] >= 0.05 else 'an outlier'} after Bonferroni correction ({K['max_t_bonf']}). Mix {K['cook_mix']} has the largest influence (Cook's D {K['cook_max']}). {K['excl_txt']}</p>
   <figure class="plate"><img src="figures/F09_residual_diagnostics.png" alt="Residual diagnostics" loading="lazy"></figure>
 </section>
 
 <section id="robustness">
   <h2>Robustness</h2>
   <p>Key quantities recomputed under alternative analyses. The SS dependence of the gain holds in every analysis: gain at SS 0 % between {rb.gain_SS0.min():.1f} and {rb.gain_SS0.max():.1f}, at SS 75 % between {rb.gain_SS75.min():.2f} and {rb.gain_SS75.max():.2f}. The 28-day carbonation and RCF ratios are much less stable. They depend on whether these effects are assumed proportional across ages, which is the least certain part of the model.</p>
+  <p>Several 28-day means in the corrected data carry large specimen SDs. Weighting each mean by its own specimen scatter (CV²/n added to its variance) was tested as an alternative and not adopted: the model residuals are unrelated to specimen scatter (Spearman ρ between |residual| and specimen CV: 7 d {K['spec_rho7']}, {K['spec_p7']}; 28 d {K['spec_rho28']}, {K['spec_p28']}), the weighted fit has a worse REML likelihood (ΔAIC {K['spec_dAIC']}) and it predicts left-out mixtures no better (pred. R² 7 d {K['spec_cv7']}, 28 d {K['spec_cv28']}). The 28-day scatter lies between batches, not between specimens of a batch.</p>
   {rb_tab}
   <figure class="plate"><img src="figures/F10_robustness.png" alt="Robustness of key quantities" loading="lazy"></figure>
   <figure class="plate"><img src="figures/F11_coefficient_intervals.png" alt="Wald and bootstrap intervals for the coefficients" loading="lazy"></figure>
@@ -432,7 +459,9 @@ def main():
 <section id="data">
   <h2>Data</h2>
   <p>{D['n_mixes']} mixtures, each tested at 7 and 28 days ({D['n_obs']} means of typically three specimens; single specimens for mix 29 at both ages and mixes 11 and 30 at 28 days). Four nominal design points were batched more than once (mixes 1/12/19, 10/14, 6/17/28, 8/23), giving 6 df of replicate (pure) error per age: SD {K['pe7M']} MPa at 7 d and {K['pe28M']} MPa at 28 d, or {K['pe7']} and {K['pe28']} on the ln scale. The ln scale makes the replicate scatter equal at the two ages. The 0.5 h level has only two distinct compositions (mixes 1/12/19 and 10/14).</p>
-  <p>The corrected data set controls. It differs from the run sheet behind the earlier 7-day model in {D['n_changes']} entries. The largest is the 7-day strength of mix 12 (14.70 → 16.20 MPa); others add a third decimal to A/B, set SS of mix 24 to 0 % (was 0.88 %) and A/B of mix 9 to 0.442 (was 0.43). Regressions use the corrected values as given; replicate groups are defined by nominal design point.</p>
+  <p>The data are the corrected results of the 30 mixes (<code>data/source/30_mixes_7_and_28_days_strength_results.pdf</code>), which replace the previous corrected sheet. Compositions are unchanged. {K['v1_n']} entries differ from the previous sheet: the 28-day strength of {K['v1_28_n']} mixes (mixes {K['v1_28_mixes']}; changes {K['v1_28_range']}, mean {K['v1_28_mean']} MPa), the 7-day strength of {K['v1_7_txt']}, {K['v1_round_n']} strengths re-rounded by 0.01 MPa, and {K['v1_sd28_n']} 28-day specimen SDs ({K['v1_sd28_up']} of them larger). Regressions use the values as given; replicate groups are defined by nominal design point.</p>
+  <details><summary>All {K['v1_n']} differences from the previous corrected data set</summary>{v1_tab}</details>
+  <p>Against the run sheet behind the earlier 7-day model the data differ in {D['n_changes']} entries. The largest strength change is {K['t00_big']}; others add a third decimal to A/B, set SS of mix 24 to 0 % (was 0.88 %) and A/B of mix 9 to 0.442 (was 0.43).</p>
   <details><summary>All {D['n_changes']} differences from the previous 7-day data</summary>{ch_tab}</details>
   <figure class="plate"><img src="figures/F01_data_overview.png" alt="Paired strengths and observed gain against SS" loading="lazy"></figure>
 </section>
@@ -448,6 +477,7 @@ def main():
   <pre class="code">pip install -r requirements.txt
 python analysis/prepare_data.py     # long format, change log, replicate error
 python analysis/run_analysis.py     # selection, validation, resampling, robustness (about 10 min on 4 cores)
+python analysis/compare_previous.py # previous vs current data (T24)
 python analysis/make_figures.py     # results/figures/*.png|pdf
 python analysis/build_report.py     # report/index.html, report/Model_Summary.pdf, report/MODEL_REPORT.md</pre>
   <p class="note">Tables T00–T23 in <code>results/tables</code> hold every number on this page. The mixed model is implemented in <code>analysis/lmm.py</code> (REML/GLS for the bivariate 7/28-day response, Satterthwaite df). Under compound symmetry it reproduces ordinary least squares on the mixture mean and gain exactly, and under UN the exhaustive search uses the exact factorisation of the likelihood (<code>analysis/selection.py</code>). Seed {R['meta']['seed']}; NumPy {R['meta']['numpy']}, pandas {R['meta']['pandas']}.</p>
@@ -504,7 +534,7 @@ def build_markdown(R, K, ex, final, tf, coef, ag, top, ncvm, rb, opt, code, cvt,
 
 ## Summary
 
-A single linear mixed model describes the 7- and 28-day compressive strength of the 30 mixtures ({D['n_obs']} results). Curing age is a two-level factor, carbonation a four-level factor (NC, 0.5 h, 1 h, 5 h), and the two results of each mixture are a correlated pair. The model was chosen by an exhaustive AICc search over {K['n_models']} hierarchical models and two within-mixture covariance structures. It was checked with nested cross-validation, bootstrap and subsample re-selection, lack-of-fit tests, residual diagnostics and {len(rb) - 1} alternative analyses.
+A single linear mixed model describes the 7- and 28-day compressive strength of the 30 mixtures ({D['n_obs']} results), using the updated corrected results (`data/source/30_mixes_7_and_28_days_strength_results.pdf`). Curing age is a two-level factor, carbonation a four-level factor (NC, 0.5 h, 1 h, 5 h), and the two results of each mixture are a correlated pair. The model was chosen by an exhaustive AICc search over {K['n_models']} hierarchical models and two within-mixture covariance structures. It was checked with nested cross-validation, bootstrap and subsample re-selection, lack-of-fit tests, residual diagnostics and {len(rb) - 1} alternative analyses.
 
 * **SS** is the dominant factor at both ages, with a peak at mid-range SS (SS {K['p_D']}; SS² {K['p_D2']}).
 * **Curing age interacts with SS only.** The strength gain f28/f7 is {K['g0']} (95 % CI {K['g0_ci']}) at SS 0 %, reaches a minimum of {K['gmin']} near SS {K['gmin_ss']} % and is {K['g75']} ({K['g75_ci']}) at SS 75 % (SS × Age {K['p_D.Age']}, SS² × Age {K['p_D2.Age']}).
@@ -513,12 +543,22 @@ A single linear mixed model describes the 7- and 28-day compressive strength of 
 * **A/B** (0.42–0.48) has no detectable effect (every A/B term added to the final model: p ≥ {K['add_C_min']}).
 * **Reliability**: 7-day strength of a new mixture is predicted with R² {K['pr7']} (RMSE {K['rm7']} MPa, replicate scatter {K['pe7M']} MPa). 28-day strength is predicted poorly (R² {K['pr28']}, RMSE {K['rm28']} MPa): the 28-day residual scatter ({K['cv28']}) exceeds the replicate scatter ({100*float(K['pe28']):.0f} %).
 
+## What changed with the corrected data
+
+{K['chg_intro']}
+
+{md_table(pd.read_csv(os.path.join(dz.ROOT, 'results', 'tables', 'T24_comparison_with_previous_data.csv')).query('group in ["model", "term"]'), ['quantity', 'previous', 'current'], ['Quantity', 'Previous corrected data', 'Current corrected data'])}
+
+Full comparison, including optima and the 7 → 28-day change of each effect: `results/tables/T24_comparison_with_previous_data.csv`.
+
 ## 1 Data
 
 * Corrected data set (controlling): `data/strength_7d_28d_corrected.csv`; long format `data/strength_long.csv`.
 * {D['n_mixes']} mixtures, 24 distinct design points; replicate batches: mixes 1/12/19, 10/14, 6/17/28, 8/23 (6 df pure error per age).
 * Pure-error SD: {K['pe7M']} MPa (7 d), {K['pe28M']} MPa (28 d); on the ln scale {K['pe7']} and {K['pe28']}, i.e. equal once the scale is logarithmic.
-* {D['n_changes']} differences from the run sheet of the earlier 7-day model (`results/tables/T00_changes_vs_previous_7d_data.csv`). The largest is the 7-day strength of mix 12 (14.70 → 16.20 MPa).
+* Source: `data/source/30_mixes_7_and_28_days_strength_results.pdf` (corrected results of the 30 mixes); it replaces the previous corrected sheet (kept as `data/previous_corrected_v1.csv`). Compositions are unchanged.
+* {K['v1_n']} differences from the previous corrected data (`results/tables/T00b_changes_vs_previous_corrected_data.csv`): the 28-day strength of {K['v1_28_n']} mixes (mixes {K['v1_28_mixes']}; {K['v1_28_range']}, mean {K['v1_28_mean']} MPa), the 7-day strength of {K['v1_7_txt']}, {K['v1_round_n']} strengths re-rounded by 0.01 MPa and {K['v1_sd28_n']} 28-day specimen SDs ({K['v1_sd28_up']} larger).
+* {D['n_changes']} differences from the run sheet of the earlier 7-day model (`results/tables/T00_changes_vs_previous_7d_data.csv`). The largest strength change is {K['t00_big']}.
 
 ## 2 Methods
 
@@ -574,7 +614,7 @@ Joint lack of fit (exact, against replicate batches): gain {K['lof_gain']}; leve
 ## 4 How curing age changes the response
 
 * Gain ratio f28/f7: SS 0 % {K['g0']} ({K['g0_ci']}); SS 37.5 % {K['g37']} ({K['g37_ci']}); SS 75 % {K['g75']} ({K['g75_ci']}); minimum {K['gmin']} at SS {K['gmin_ss']} % (95 % CI of location {K['gmin_ci']} %). Gain at SS 0 % / gain at SS 75 % = {K['g0v75']} ({K['g0v75_ci']}; {K['g0v75_p']}). The rise above the minimum is not significant ({K['g75vmin_p']}).
-* No other age interaction improves the model (added-term p ≥ {rt.pnum(pd.DataFrame(R['added_terms']).query('terms.str.contains(".Age")', engine='python').p.min())}). In the age-specific refit the interaction effects keep their sign but are smaller and less precise at 28 d; the changes are not significant (RCF × SS {K['chg_AD']}, K × RCF {K['chg_KA']}, K × SS {K['chg_KD']}). The 5 h level shows a smaller gain than NC (×{K['c5_change']}, {K['c5_change_ci']}; {K['chg_Carb[5 h]']}), which the selection does not retain.
+* No other age interaction is selected (smallest added-term p = {rt.pnum(pd.DataFrame(R['added_terms']).query('terms.str.contains(".Age")', engine='python').p.min())}{', and every addition raises AICc' if (pd.DataFrame(R['added_terms']).dAICc > 0).all() else ''}). In the age-specific refit the interaction effects keep their sign but are smaller and less precise at 28 d; the changes are not significant (RCF × SS {K['chg_AD']}, K × RCF {K['chg_KA']}, K × SS {K['chg_KD']}). The 5 h level shows a smaller gain than NC (×{K['c5_change']}, {K['c5_change_ci']}; {K['chg_Carb[5 h]']}), which the selection does not retain.
 * SS at maximum strength: NC, RCF 30 % — {rt_ss(K, 7, 'NC', 30)} at 7 d, {rt_ss(K, 28, 'NC', 30)} at 28 d; carbonated (1 h), RCF 50 % — {rt_ss(K, 7, '1 h', 50)} at 7 d, {rt_ss(K, 28, '1 h', 50)} at 28 d.
 
 {md_table(ag, ['lab', 'e7', 'e28', 'chg', 'p_change'], ['Term', '7 d [95 % CI]', '28 d [95 % CI]', 'Change', 'p (change)'], {'p_change': rt.pnum})}
@@ -609,10 +649,10 @@ Residual bootstrap re-selection: exact model {K['resid_exact']}, same terms {K['
 ## 9 Interpretation and limits
 
 1. The 7-day strength is described to within replicate precision by SS (quadratic), RCF, carbonation, and the interactions K × SS, K × RCF and RCF × SS.
-2. From 7 to 28 days the strength of every mixture increases. The size of the increase is governed by SS: NaOH-only mixes roughly triple, silicate-rich mixes gain about half as much. No detectable part of the gain depends on RCF, A/B or carbonation.
+2. From 7 to 28 days the model predicts an increase for every mixture; observed, {K['n_gain']} of 30 mixes gain strength{f" and mixes {K['nogain_mixes']} do not ({K['nogain_txt']})" if K['nogain_txt'] else ""}. The size of the increase is governed by SS: NaOH-only mixes roughly triple, silicate-rich mixes gain about half as much. No part of the gain depending on RCF or A/B is detected. {f"A smaller gain after 5 h carbonation is possible (5 h vs NC ×{K['c5_change']}, {K['chg_Carb[5 h]']}; joint carbonation × age {K['add_Carb.Age']}) but is not selected." if K['chg_c5_val'] < 0.05 else "No part of the gain depending on carbonation is detected."}
 3. Because the gain does not depend on them, the model carries the 7-day RCF and carbonation effects to 28 days as the same percentage effects (larger in MPa, because 28-day strength is higher). The 28-day data agree with this in sign, but they are too scattered to confirm the size of these effects at 28 days or to rule out moderate weakening. This is the main limitation.
-4. 28-day strength of a new mixture is uncertain (95 % prediction interval about ×/÷ {K['pi28']}, against ×/÷ {K['pi7']} at 7 days) because 28-day results scatter more between mixtures than replicate batches do. Unrecorded differences between batches during curing, or data issues (for example mix 7 at 28 d), are possible reasons that the data cannot settle.
-5. Suggested confirmation: triplicate batches tested at both ages at the predicted optima (carbonated RCF {opt_c_rcf}, SS ≈ {opt_c_ss}; uncarbonated SS ≈ {opt_nc_ss}), repeats of mix 7 and mix 25 (the two largest 28-day residuals), and a 5 h vs NC comparison at equal composition to test the smaller gain seen after long carbonation.
+4. 28-day strength of a new mixture is uncertain (95 % prediction interval about ×/÷ {K['pi28']}, against ×/÷ {K['pi7']} at 7 days) because 28-day results scatter more between mixtures than replicate batches do. Unrecorded differences between batches during curing, or data issues (for example mix {K['big28'][0]} at 28 d), are possible reasons that the data cannot settle. The 28-day residuals are not related to the specimen scatter of each mean (Spearman ρ = {K['spec_rho28']}, {K['spec_p28']}), so weighting the means by their SDs does not help (robustness table).
+5. Suggested confirmation: triplicate batches tested at both ages at the predicted optima (carbonated RCF {opt_c_rcf}, SS ≈ {opt_c_ss}; uncarbonated SS ≈ {opt_nc_ss}), repeats of {K['big28_txt']} (the two largest 28-day residuals), and a 5 h vs NC comparison at equal composition to test the smaller gain seen after long carbonation.
 
 ## 10 Files
 
@@ -631,6 +671,12 @@ def build_readme(R, K):
 Reproducible analysis of the corrected 7- and 28-day compressive strengths of 30 mixtures. One linear mixed
 model covers both curing ages: curing age is a two-level factor, carbonation a four-level factor (NC, 0.5, 1, 5 h),
 and the paired 7/28-day results of each mixture share a random mixture effect with age-specific residual variance.
+
+**Data update.** The analysis now uses the updated corrected results
+(`data/source/30_mixes_7_and_28_days_strength_results.pdf`), which change the 28-day strength of {K['v1_28_n']} mixes and the
+7-day strength of {K['v1_7_txt']} ({K['v1_n']} entries in all, `results/tables/T00b_changes_vs_previous_corrected_data.csv`).
+The whole protocol was re-run unchanged. {'It selects the same model as before.' if K['same_model'] else 'It selects a different model (see the report).'}
+Previous and current results side by side: `results/tables/T24_comparison_with_previous_data.csv` and the "What changed" section of the report.
 
 ## Headline results
 
@@ -653,10 +699,12 @@ interactive report: [`report/index.html`](report/index.html) (open in a browser;
 |---|---|
 | `data/strength_7d_28d_corrected.csv` | corrected data set (controlling), one row per mixture |
 | `data/strength_long.csv` | long format, one row per mixture and age |
+| `data/previous_corrected_v1.csv` | previous corrected data set (superseded; for the change log and the comparison only) |
 | `data/previous_7d_run_sheet.csv` | run sheet used by the earlier 7-day model (for the change log only) |
-| `data/source/` | corrected data as supplied (PDF); `strength_7d_28d_corrected.csv` is transcribed from it |
+| `data/source/` | corrected data as supplied (PDF); `strength_7d_28d_corrected.csv` is transcribed from `30_mixes_7_and_28_days_strength_results.pdf`; `superseded/` holds the previous sheet |
 | `reference/previous_7day_model/` | earlier 7-day model report (HTML, PDF), used as a methodological reference |
-| `analysis/prepare_data.py` | long format, change log (T00), replicate error |
+| `analysis/prepare_data.py` | long format, change logs (T00, T00b), replicate error |
+| `analysis/compare_previous.py` | previous vs current results of the same protocol (T24); `results/previous_v1/` holds the previous key results |
 | `analysis/run_analysis.py` | the protocol: scale, covariance, coding, exhaustive selection, validation, resampling, robustness, contrasts |
 | `analysis/lmm.py` | bivariate REML/GLS mixed model with Satterthwaite df |
 | `analysis/selection.py` | hierarchy bookkeeping, exhaustive AICc search (exact CS/UN factorisation), backward elimination |
@@ -664,7 +712,7 @@ interactive report: [`report/index.html`](report/index.html) (open in a browser;
 | `analysis/make_figures.py` | figures F01–F11 (PNG 300 dpi + PDF) |
 | `analysis/build_report.py`, `analysis/report_text.py` | reports; every number is read from `results/model_results.json` |
 | `results/model_results.json` | all results |
-| `results/tables/` | T00–T23 CSV tables |
+| `results/tables/` | T00–T24 CSV tables |
 | `results/figures/` | F01–F11 |
 | `report/` | `index.html`, `Model_Summary.pdf`, `MODEL_REPORT.md` |
 
@@ -674,6 +722,7 @@ interactive report: [`report/index.html`](report/index.html) (open in a browser;
 pip install -r requirements.txt
 python analysis/prepare_data.py
 python analysis/run_analysis.py          # about {R['runtime_s'] / 60:.0f} min on 4 cores ({R['meta']['n_boot']:,} resamples per scheme); --quick for a test run
+python analysis/compare_previous.py      # previous vs current data (T24)
 python analysis/make_figures.py
 python analysis/build_report.py          # needs Chromium for the PDF
 ```

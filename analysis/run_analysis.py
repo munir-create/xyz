@@ -555,6 +555,19 @@ def main(quick=False, n_boot=None, procs=4):
                           np.repeat(d.C.values, 2), np.repeat(d.K.values, 2)])
     bp2 = sm.OLS(wf ** 2, Zf).fit()
     rho_run = stats.spearmanr(d.mix.values, np.abs(w).mean(1))
+    # is the residual scatter of a mean related to the specimen scatter behind it?
+    spec_cv = np.column_stack([d.f7_sd / d.f7_mean, d.f28_sd / d.f28_mean])
+    pooled_cv = np.array([R["data"]["specimen_scatter"][a]["pooled_cv"] for a in ("7", "28")])
+    spec_cv_f = np.where(np.isnan(spec_cv), pooled_cv, spec_cv)
+    sw_rows = {}
+    for j, a in enumerate(("7", "28")):
+        ok = ~np.isnan(spec_cv[:, j])
+        rs = stats.spearmanr(np.abs(resid[ok, j]), spec_cv[ok, j])
+        sw_rows[a] = {"rho": rs.statistic, "p": rs.pvalue, "n": int(ok.sum()),
+                      "median_cv": float(np.median(spec_cv[ok, j])),
+                      "se_mean_ln_median": float(np.median(spec_cv_f[:, j] / np.sqrt(d[f"f{a}_n"].values)))}
+    R["specimen_weighting"] = {"resid_vs_specimen_cv": sw_rows,
+                               "extra_var": spec_cv_f ** 2 / d[["f7_n", "f28_n"]].values.astype(float)}
     dw = [float(np.sum(np.diff(w[:, j]) ** 2) / np.sum(w[:, j] ** 2)) for j in (0, 1)]
     diag = pd.DataFrame({"mix": d.mix, "carbonation": d.carbonation, "RCF": d.RCF_pct, "SS": d.SS_pct, "AB": d.AB,
                          "obs7": d.f7_mean, "fit7": np.exp(fitted[:, 0]), "obs28": d.f28_mean,
@@ -929,6 +942,20 @@ def main(quick=False, n_boot=None, procs=4):
     mw, _, _ = fit(final, d, struct=STRUCT, extra_var=ev)
     rob.append({"analysis": "Same terms, single-specimen means down-weighted (n = 1 vs 3)",
                 **summarize(lmm_pred(mw, final), None)})
+    # each mean weighted by its own specimen scatter: known within-batch variance CV_i^2 / n_i on the ln scale
+    # (pooled CV where only one specimen was tested) added to the batch-level covariance
+    ev_s = R["specimen_weighting"]["extra_var"]
+    ms, _, _ = fit(final, d, struct=STRUCT, extra_var=ev_s)
+    Ps = np.zeros_like(Y)
+    for i in range(len(d)):
+        tr = np.arange(len(d)) != i
+        mm = PairedLMM(Y[tr], Xf[tr], names, STRUCT, extra_var=ev_s[tr], hessian=False)
+        Ps[i] = Xf[i] @ mm.beta
+    R["specimen_weighting"].update({"reml_loglik": ms.ll, "reml_loglik_unweighted": m.ll,
+                                    "dAIC_weighted_minus_unweighted": -2 * (ms.ll - m.ll),
+                                    "cv": cv_metrics(Y, Ps), "Sigma": ms.Sigma})
+    rob.append({"analysis": "Same terms, each mean weighted by its own specimen scatter (CV²/n added to the variance)",
+                **summarize(lmm_pred(ms, final), Ps, extra={"AICc": ms.aicc_ml()[0]})})
     # Huber-robust (whitened IRLS, Sigma fixed at REML estimate)
     Lc = np.linalg.cholesky(m.Sigma)
     yw = np.linalg.solve(Lc, Y.T).T.reshape(-1)

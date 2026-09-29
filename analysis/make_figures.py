@@ -91,8 +91,10 @@ def fig_data(R, d):
         s = d[d.carbonation == c]
         ax.scatter(s.f7_mean, s.f28_mean, marker=CARB_MK[c], s=26, color=CARB_COL[c], edgecolor="white",
                    linewidth=0.7, zorder=3, label=c)
+    gr = (d.f28_mean / d.f7_mean).values
+    lab = set(d.mix.values[np.argsort(gr)[:2]]) | set(d.mix.values[np.argsort(-gr)[:2]]) | {int(d.mix.values[np.argmax(d.f28_mean.values)])}
     for _, r in d.iterrows():
-        if r.mix in (7, 25, 14, 12):
+        if r.mix in lab:
             ax.annotate(f"{int(r.mix)}", (r.f7_mean, r.f28_mean), xytext=(4, 2), textcoords="offset points",
                         fontsize=6.5, color=INK2)
     ax.set_xscale("log"); ax.set_yscale("log")
@@ -364,8 +366,9 @@ def fig_obs_pred(R, d):
         ax.text(0.97, 0.04, f"7 d: R² {'pred ' if k7 != 'fit7' else ''}{v['predR2_7']:.2f}, RMSE {v['rmse_MPa_7']:.1f} MPa\n"
                 f"28 d: R² {'pred ' if k7 != 'fit7' else ''}{v['predR2_28']:.2f}, RMSE {v['rmse_MPa_28']:.1f} MPa",
                 transform=ax.transAxes, ha="right", va="bottom", fontsize=6.8, color=INK2)
+    lab28 = set(t.mix.values[np.argsort(-np.abs(np.log(t.obs28 / t.cv28)).values)[:4]])
     for _, r in t.iterrows():
-        if r.mix in (7, 25, 4, 14):
+        if r.mix in lab28:
             axs[1].annotate(str(int(r.mix)), (r.obs28, r.cv28), xytext=(3, -8), textcoords="offset points", fontsize=6.3, color=INK2)
     axs[0].set_ylabel("Model (MPa, median)")
     axs[0].legend(loc="upper left")

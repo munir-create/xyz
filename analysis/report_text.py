@@ -230,7 +230,97 @@ def key_numbers(R, ex):
     K["sw_p"], K["bp_p"], K["bp2_p"] = fp(dg["shapiro_p"]), fp(dg["bp_fitted_age_p"]), fp(dg["bp_factors_p"])
     K["max_t"] = f2(dg["max_abs_t"]); K["max_t_mix"] = dg["max_t_obs"]["mix"]; K["max_t_age"] = dg["max_t_obs"]["age"]
     tab = pd.DataFrame(dg["table"])
-    K["max_t_bonf"] = fp(float(min(tab.p_bonf7.min(), tab.p_bonf28.min())))
+    K["max_t_bonf_val"] = float(min(tab.p_bonf7.min(), tab.p_bonf28.min()))
+    K["max_t_bonf"] = fp(K["max_t_bonf_val"])
+    rowt = tab[tab.mix == K["max_t_mix"]].iloc[0]
+    a_ = str(K["max_t_age"])
+    K["max_t_obs"], K["max_t_fit"], K["max_t_cv"] = f1(rowt[f"obs{a_}"]), f1(rowt[f"fit{a_}"]), f1(rowt[f"cv{a_}"])
+    big28 = tab.reindex(tab.t_del28.abs().sort_values(ascending=False).index).mix.astype(int).tolist()
+    K["big28"] = big28[:2]
+    K["big28_txt"] = " and ".join(f"mix {m}" for m in big28[:2])
+    exc = [r for r in R["robustness"] if " excluded (" in r["analysis"]]
+    same = [r["analysis"].endswith("the same model") for r in exc]
+    if exc and all(same):
+        K["excl_txt"] = ("Excluding either mixture leaves the selected model unchanged." if len(exc) == 2 else
+                         "Excluding this mixture leaves the selected model unchanged.")
+    else:
+        K["excl_txt"] = "Re-selection without them: " + "; ".join(r["analysis"].split("; re-selection gives ")[0].replace("Same terms, ", "")
+                                                                  + " → " + r["analysis"].split("; re-selection gives ")[1] for r in exc) + "."
+    # change logs
+    ch = pd.read_csv(os.path.join(RES, "tables", "T00_changes_vs_previous_7d_data.csv"))
+    ch7 = ch[ch.variable == "7-day strength (MPa)"]
+    j = ch7.change.abs().idxmax()
+    K["t00_big"] = f"the 7-day strength of mix {int(ch7.loc[j, 'mix'])} ({ch7.loc[j, 'previous']:.2f} → {ch7.loc[j, 'corrected']:.2f} MPa)"
+    K["t00_n7"] = int(len(ch7))
+    v1 = pd.read_csv(os.path.join(RES, "tables", "T00b_changes_vs_previous_corrected_data.csv"))
+    K["v1_n"] = int(len(v1))
+    m28 = v1[(v1.variable == "28-day strength (MPa)") & (v1.change.abs() > 0.05)]
+    m7 = v1[(v1.variable == "7-day strength (MPa)") & (v1.change.abs() > 0.05)]
+    r7 = v1[(v1.variable == "7-day strength (MPa)") & (v1.change.abs() <= 0.05)]
+    K["v1_28_mixes"] = ", ".join(str(int(x)) for x in m28.mix)
+    K["v1_28_n"] = int(len(m28))
+    K["v1_28_range"] = f"{minus(f'{m28.change.min():+.2f}')} to {minus(f'{m28.change.max():+.2f}')} MPa"
+    K["v1_28_mean"] = minus(f"{m28.change.mean():+.2f}")
+    K["v1_7_txt"] = "; ".join(f"mix {int(r.mix)} {r.previous:.2f} → {r.corrected:.2f} MPa" for r in m7.itertuples())
+    K["v1_round_n"] = int(len(v1[v1.variable.str.contains('strength') & (v1.change.abs() <= 0.05)]))
+    # observed 7 -> 28-day gains
+    dd = dz.load()
+    gr = dd.f28_mean / dd.f7_mean
+    ng = dd[gr < 1.02]
+    K["n_gain"] = int((gr >= 1.02).sum())
+    K["nogain_txt"] = "; ".join(f"mix {int(r.mix)}, {r.carbonation}, RCF {r.RCF_pct:g} %, SS {r.SS_pct:g} %: {r.f7_mean:.2f} → {r.f28_mean:.2f} MPa"
+                                for r in ng.itertuples())
+    K["nogain_mixes"] = " and ".join(str(int(m)) for m in ng.mix)
+    K["nogain_5h"] = bool(len(ng)) and bool((ng.carbonation == "5 h").all())
+    addC = add.loc["Carb.Age"]
+    K["add_Carb.Age_val"] = float(addC.p)
+    K["add_Carb.Age_dAICc"] = minus(f"{addC.dAICc:+.1f}")
+    K["chg_c5_val"] = float(a.loc["Carb[5 h]", "p_change"])
+    K["ncv_cs7"], K["ncv_cs28"] = f2(ncm.loc["AICc, CS only", "predR2_7"]), minus(f2(ncm.loc["AICc, CS only", "predR2_28"]))
+    # nested-CV procedure with the best 28-day prediction
+    b28 = ncm.predR2_28.idxmax()
+    K["ncv_best28_proc"] = b28
+    K["ncv_best28_7"] = f2(ncm.loc[b28, "predR2_7"])
+    # Box-Cox interval of the saturated model
+    K["bc_full_excl0"] = bc["full_UN"]["ci"][1] < 0 or bc["full_UN"]["ci"][0] > 0
+    # backward elimination at alpha 0.05 relative to the final model
+    K["be05_subset"] = set(R["backward"][f"{R['final_struct']}_0.05"]["terms"]) <= set(R["final_terms"])
+    K["be05_same"] = set(R["backward"][f"{R['final_struct']}_0.05"]["terms"]) == set(R["final_terms"])
+    K["be10_more_age"] = (len([t for t in R["backward"][f"{R['final_struct']}_0.10"]["terms"] if t.endswith(".Age")])
+                          > len([t for t in R["final_terms"] if t.endswith(".Age")]))
+    # comparison with the same analysis on the previous corrected data set
+    with open(os.path.join(RES, "comparison_previous.json")) as f:
+        C = json.load(f)
+    P_, C_ = C["previous"], C["current"]
+    shifts = []
+    for col, v in C_["coef"].items():
+        if col in P_["coef"]:
+            se = (v["hi"] - v["lo"]) / (2 * 1.96)
+            shifts.append((abs(v["est"] - P_["coef"][col]["est"]) / se, col, P_["coef"][col]["est"], v["est"]))
+    shifts.sort(reverse=True)
+    sh = shifts[0]
+    lost = [t for t in C_["term_p"] if P_["term_p"].get(t) is not None and P_["term_p"][t] < 0.05 <= C_["term_p"][t]]
+    gained = [t for t in C_["term_p"] if P_["term_p"].get(t) is not None and C_["term_p"][t] < 0.05 <= P_["term_p"][t]]
+    K["same_model"] = C["same_terms"]
+    K["coef_shift"] = sh
+    K["chg_intro"] = (
+        ("The protocol was re-run unchanged on the corrected data. It selects the same model as before (same terms, "
+         f"{C_['final_struct']} covariance)." if C["same_terms"] else
+         f"The protocol was re-run unchanged on the corrected data. It now selects {' '.join(C_['final_terms'])} "
+         f"({C_['final_struct']}) instead of {' '.join(P_['final_terms'])} ({P_['final_struct']}).")
+        + f" The largest coefficient change is {sh[1]} ({minus(f'{sh[2]:.3f}')} → {minus(f'{sh[3]:.3f}')}, {sh[0]:.1f} standard errors)."
+        + (f" Terms no longer significant at 5 %: {', '.join(dz.label(t) for t in lost)}." if lost else "")
+        + (f" Terms now significant at 5 %: {', '.join(dz.label(t) for t in gained)}." if gained else "")
+        + f" Prediction of a left-out mixture: 7 d R² {minus(f2(P_['predR2_7']))} → {minus(f2(C_['predR2_7']))}, "
+        f"28 d R² {minus(f2(P_['predR2_28']))} → {minus(f2(C_['predR2_28']))} (RMSE {f1(P_['rmse_pred_MPa_28'])} → {f1(C_['rmse_pred_MPa_28'])} MPa). "
+        f"Gain f28/f7 at SS 0 %: {f2(P_['gain_SS0'])} → {f2(C_['gain_SS0'])}; at SS 75 %: {f2(P_['gain_SS75'])} → {f2(C_['gain_SS75'])}.")
+    spw = R["specimen_weighting"]
+    K["spec_rho28"], K["spec_p28"] = f2(spw["resid_vs_specimen_cv"]["28"]["rho"]), fp(spw["resid_vs_specimen_cv"]["28"]["p"])
+    K["spec_rho7"], K["spec_p7"] = f2(spw["resid_vs_specimen_cv"]["7"]["rho"]), fp(spw["resid_vs_specimen_cv"]["7"]["p"])
+    K["spec_dAIC"] = minus(f"{spw['dAIC_weighted_minus_unweighted']:+.1f}")
+    K["spec_cv7"], K["spec_cv28"] = minus(f2(spw["cv"]["predR2_7"])), minus(f2(spw["cv"]["predR2_28"]))
+    sd28 = v1[v1.variable == "28-day SD (MPa)"]
+    K["v1_sd28_n"], K["v1_sd28_up"] = int(len(sd28)), int((sd28.change > 0).sum())
     K["cook_max"] = f2(dg["cook_max"]); K["cook_mix"] = dg["cook_max_mix"]
     K["run_rho"], K["run_p"] = f2(dg["run_order_rho"]), fp(dg["run_order_p"])
     # optimum contrasts

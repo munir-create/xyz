@@ -2,8 +2,8 @@
 Exact SHAP (Shapley additive explanation) values for the finalised strength models.
 
 Models explained
-  7d      independent 7-day model   ln f7  ~ RCF + SS + SS^2 + Carb + RCF.SS + K.RCF + K.SS
-  28d     independent 28-day model  ln f28 ~ RCF + RCF^2 + A/B + SS
+  7d      independent 7-day model   (terms as selected in results/separate/separate_results.json)
+  28d     independent 28-day model  (terms as selected in results/separate/separate_results.json)
   paired  paired 7/28-day mixed model (curing age is a model input)
 
 Features = the actual model inputs: RCF (%), SS (%), A/B, Carbonation (one categorical feature
@@ -183,14 +183,26 @@ def crosscheck(model, X, B, mine):
             "max_abs_diff_interactions": d2}
 
 
-def analytic_check_28(model, X, B, phi):
-    """The 28-day model is additive on the ln scale, so each SHAP value is closed form:
-    phi_RCF = bA (A - mean A) + bAA (A^2 - mean A^2), phi_AB = bC (C - mean C), phi_SS = bD (D - mean D)."""
-    b = dict(zip(model.names, model.beta))
-    A, C, D = (X[:, 0] - 30) / 20, (X[:, 2] - 0.45) / 0.03, (X[:, 1] - 37.5) / 37.5
-    Ab, Cb, Db = (B[:, 0] - 30) / 20, (B[:, 2] - 0.45) / 0.03, (B[:, 1] - 37.5) / 37.5
-    ref = np.column_stack([b["A"] * (A - Ab.mean()) + b["A2"] * (A ** 2 - (Ab ** 2).mean()), b["D"] * (D - Db.mean()),
-                           b["C"] * (C - Cb.mean()), np.zeros(len(X))])
+FEATURE_OF_COLUMN = {"A": 0, "A2": 0, "D": 1, "D2": 1, "C": 2, "C2": 2}
+
+
+def is_additive(model):
+    """True if no model term links two inputs (no RCF.SS, K.RCF, ... columns)."""
+    return all(c == "Intercept" or c in FEATURE_OF_COLUMN or c.startswith("Carb[") for c in model.names)
+
+
+def analytic_check(model, X, B, phi):
+    """For a model that is additive on the ln scale each SHAP value is closed form:
+    phi_j(x) = sum over the columns c of input j of beta_c (col_c(x) - mean over the background of col_c)."""
+    if not is_additive(model):
+        return None
+    Dx, Db = model.design(X), model.design(B)
+    ref = np.zeros((len(X), len(FEATS)))
+    for k, c in enumerate(model.names):
+        if c == "Intercept":
+            continue
+        j = 3 if c.startswith("Carb[") else FEATURE_OF_COLUMN[c]
+        ref[:, j] += model.beta[k] * (Dx[:, k] - Db[:, k].mean())
     return float(np.max(np.abs(ref - phi)))
 
 
@@ -243,9 +255,11 @@ def main():
         cc = crosscheck(model, X, B, ex["ln"])
         print("  cross-check vs shap.ExactExplainer:", cc)
         entry = {"X": X, "crosscheck": cc, "features": FEATS_P if model.with_age else FEATS}
-        if key == "28d":
-            entry["analytic_check_max_diff"] = analytic_check_28(model, X, B, ex["ln"]["phi"])
-            print("  analytic check (28 d additive):", entry["analytic_check_max_diff"])
+        if key in ("7d", "28d"):
+            entry["additive"] = is_additive(model)
+            entry["analytic_check_max_diff"] = analytic_check(model, X, B, ex["ln"]["phi"])
+            if entry["additive"]:
+                print(f"  analytic check ({key} additive):", entry["analytic_check_max_diff"])
         for sc in ("ln", "MPa"):
             e = ex[sc]
             entry[sc] = {"phi": e["phi"], "base": e["base"], "inter": e["inter"], "fx": e["fx"],

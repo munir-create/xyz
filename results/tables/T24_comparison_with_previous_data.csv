@@ -1,0 +1,69 @@
+quantity,previous,current,group
+Selected terms,A D Carb AD D2 KA KD Age D.Age D2.Age,A D Carb AD D2 KA KD Age D.Age D2.Age,model
+Within-mixture covariance,UN,UN,model
+Box–Cox λ (selected model),0.13,0.14,model
+AICc of the final model,11.51,9.66,model
+AICc of the best CS model,16.43,16.05,model
+"Replicate (pure-error) SD, 7 d (MPa)",2.5,2.2,model
+"Replicate (pure-error) SD, 28 d (MPa)",4.1,3.9,model
+Residual SD 7 d (ln),0.153,0.147,model
+Residual SD 28 d (ln),0.327,0.335,model
+7/28-day correlation within mixture,0.49,0.52,model
+R² 7 d,0.95,0.96,model
+R² 28 d,0.34,0.23,model
+"Predicted R², leave one mixture out, 7 d",0.90,0.91,model
+"Predicted R², leave one mixture out, 28 d",0.09,-0.06,model
+"RMSE of a left-out mixture, 7 d (MPa)",2.2,2.1,model
+"RMSE of a left-out mixture, 28 d (MPa)",7.7,7.6,model
+"Nested CV pred. R² of the selection procedure, 7 d",0.87,0.89,model
+"Nested CV pred. R² of the selection procedure, 28 d",0.03,-0.09,model
+"Lack of fit p, 7 d",0.89,0.82,model
+"Lack of fit p, 28 d",0.089,0.087,model
+Gain f28/f7 at SS 0 %,2.92,2.88,model
+Gain f28/f7 at SS 37.5 %,1.56,1.46,model
+Gain f28/f7 at SS 75 %,1.58,1.53,model
+SS of minimum gain (%),55,54,model
+"1 h / NC at RCF 50 %, SS 0 %",1.55,1.58,model
+"1 h / NC at RCF 10 %, SS 75 %",0.53,0.53,model
+"p, carbonation levels 0.5 / 1 / 5 h equal",0.12,0.098,model
+"Exact final model re-selected, residual bootstrap",22 %,27 %,model
+"p, RCF",0.37,0.36,term
+"p, SS",< 0.001,< 0.001,term
+"p, Carb",0.22,0.19,term
+"p, RCF·SS",0.026,0.019,term
+"p, SS²",< 0.001,< 0.001,term
+"p, K·RCF",0.024,0.015,term
+"p, K·SS",< 0.001,< 0.001,term
+"p, Age",< 0.001,< 0.001,term
+"p, SS × Age",< 0.001,< 0.001,term
+"p, SS² × Age",0.017,0.008,term
+coefficient Intercept,"2.9551 [2.775, 3.135]","2.9151 [2.736, 3.094]",coef
+coefficient A,"0.0598 [-0.077, 0.197]","0.0591 [-0.072, 0.190]",coef
+coefficient D,"0.6029 [0.450, 0.756]","0.6010 [0.451, 0.752]",coef
+coefficient Carb[0.5 h],"0.0650 [-0.141, 0.271]","0.0465 [-0.150, 0.243]",coef
+coefficient Carb[1 h],"-0.0931 [-0.252, 0.066]","-0.0915 [-0.243, 0.060]",coef
+coefficient Carb[5 h],"0.0613 [-0.101, 0.224]","0.0705 [-0.085, 0.226]",coef
+coefficient AD,"-0.1085 [-0.202, -0.015]","-0.1102 [-0.200, -0.020]",coef
+coefficient D2,"-0.5249 [-0.729, -0.321]","-0.4991 [-0.706, -0.293]",coef
+coefficient KA,"0.1982 [0.029, 0.368]","0.2057 [0.044, 0.368]",coef
+coefficient KD,"-0.3360 [-0.507, -0.165]","-0.3441 [-0.507, -0.181]",coef
+coefficient Age,"0.4435 [0.259, 0.628]","0.3752 [0.188, 0.562]",coef
+coefficient D.Age,"-0.3059 [-0.451, -0.161]","-0.3179 [-0.465, -0.171]",coef
+coefficient D2.Age,"0.3208 [0.061, 0.580]","0.3648 [0.102, 0.628]",coef
+optimum 7 d|NC,"19.0 MPa at RCF 10, SS 61.2","19.0 MPa at RCF 10, SS 61.5",optimum
+optimum 7 d|0.5 h,"22.0 MPa at RCF 50, SS 46.0","21.6 MPa at RCF 50, SS 46.0",optimum
+optimum 7 d|1 h,"18.8 MPa at RCF 50, SS 46.0","18.8 MPa at RCF 50, SS 46.0",optimum
+optimum 7 d|5 h,"21.9 MPa at RCF 50, SS 46.0","22.1 MPa at RCF 50, SS 46.0",optimum
+optimum 28 d|NC,"28.0 MPa at RCF 10, SS 66.2","26.7 MPa at RCF 10, SS 70.2",optimum
+optimum 28 d|0.5 h,"33.1 MPa at RCF 50, SS 37.8","30.4 MPa at RCF 50, SS 36.8",optimum
+optimum 28 d|1 h,"28.3 MPa at RCF 50, SS 37.8","26.5 MPa at RCF 50, SS 36.8",optimum
+optimum 28 d|5 h,"33.0 MPa at RCF 50, SS 37.8","31.1 MPa at RCF 50, SS 36.8",optimum
+"p, change 7→28 d of A",0.93,0.83,age
+"p, change 7→28 d of D",0.002,< 0.001,age
+"p, change 7→28 d of Carb[0.5 h]",0.91,0.81,age
+"p, change 7→28 d of Carb[1 h]",0.61,0.69,age
+"p, change 7→28 d of Carb[5 h]",0.069,0.038,age
+"p, change 7→28 d of AD",0.26,0.25,age
+"p, change 7→28 d of D2",0.008,0.001,age
+"p, change 7→28 d of KA",0.42,0.33,age
+"p, change 7→28 d of KD",0.39,0.21,age

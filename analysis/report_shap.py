@@ -61,35 +61,55 @@ def inter_table(R):
     return pd.DataFrame(rows)
 
 
-CAPTIONS = [
-    ("Z01_mean_abs_SHAP_importance", "Mean |SHAP| feature importance",
-     "Average absolute SHAP value of each input over the 30 mixtures (60 mixture × age rows for the paired model), on the ln-strength scale. "
-     "Whiskers: 95 % interval over 1,000 case-bootstrap refits stratified by carbonation level. The intervals are conditional on the selected "
-     "terms, so an input the model does not contain has zero importance by construction (A/B in the 7-day model, carbonation in the 28-day model)."),
-    ("Z02_SHAP_summary_beeswarm", "SHAP summary (beeswarm)",
-     "Each dot is one mixture: its horizontal position is the SHAP value of that input, the change in predicted ln strength (top axis: the "
-     "equivalent multiplicative factor on strength) relative to the average prediction. Colour gives the input's own value (blue low, red high); "
-     "carbonation is categorical and is shown by level. Inputs are ordered by mean |SHAP|."),
-    ("Z03_SHAP_dependence_7d_vs_28d", "SHAP dependence plots, 7-day and 28-day models on one scale",
-     "SHAP value of each input against its value, for every mixture. Vertical spread at a given input value comes from interactions with the "
-     "other inputs; the 28-day model is additive, so its points fall on single curves. Carbonation (right) is plotted by level, coloured by SS, "
-     "with the level mean as a bar."),
-    ("Z04_SHAP_interaction_matrices", "SHAP interaction matrices",
-     "Mean absolute SHAP interaction values. The diagonal is the main effect of each input; each off-diagonal cell holds one half of the pair's "
-     "interaction (the full pair effect is twice the cell). A zero cell means the model has no term linking the two inputs."),
-    ("Z05_SHAP_interaction_dependence", "SHAP interaction dependence plots",
-     "Full interaction effect (both halves) for the key pairs. a: carbonation raises strength at low SS and lowers it at high SS in the 7-day "
-     "model; b: RCF helps more when carbonated; c: RCF helps more at low SS; d: in the paired model the 28-day advantage is largest at low SS."),
-    ("Z06_SHAP_waterfalls_selected_mixes", "Waterfall decompositions (MPa)",
-     "Exact Shapley decomposition of each model's median prediction in MPa for four mixtures: the highest-strength mix (25), a weak NaOH-only mix "
-     "(29), a carbonated high-RCF NaOH-only mix (30) and a carbonated silicate-rich mix (27). E[f] is the mean prediction over the 30 mixtures."),
-    ("Z07_SHAP_paired_model_age", "Paired model: curing age",
-     "a: SHAP value of curing age against SS, showing that the 7 → 28-day contribution is largest in NaOH-only mixes; b: SHAP value of SS "
-     "coloured by age, showing the flatter SS response at 28 days; c: SHAP value of RCF by carbonation level."),
-    ("Z08a_mean_abs_SHAP_importance_MPa", "Supplementary: importance on the MPa scale", "As Z01, with SHAP values of the median prediction in MPa."),
-    ("Z08b_SHAP_summary_beeswarm_MPa", "Supplementary: summary on the MPa scale",
-     "As Z02, with SHAP values in MPa. On this scale the log-linear models are no longer additive, so even the 28-day model shows small interactions."),
-]
+def absent_inputs(R):
+    """Inputs with zero importance in each separate model, e.g. 'A/B in the 7-day model'."""
+    out = []
+    for k in ("7d", "28d"):
+        z = [fn for fn, m in zip(R[k]["features"], R[k]["ln"]["mean_abs"]) if m < 1e-12]
+        if z:
+            out.append(f"{' and '.join(z)} in the {TITLE[k]}")
+    return "; ".join(out)
+
+
+def captions(R):
+    add = [TITLE[k] for k in ("7d", "28d") if R[k].get("additive")]
+    add_txt = (f"; the {' and the '.join(add)} {'is' if len(add) == 1 else 'are'} additive, so its points fall on single curves" if add else "")
+    absent = absent_inputs(R)
+    return [
+        ("Z01_mean_abs_SHAP_importance", "Mean |SHAP| feature importance",
+         "Average absolute SHAP value of each input over the 30 mixtures (60 mixture × age rows for the paired model), on the ln-strength scale. "
+         "Whiskers: 95 % interval over 1,000 case-bootstrap refits stratified by carbonation level. The intervals are conditional on the selected "
+         "terms, so an input the model does not contain has zero importance by construction" + (f" ({absent})." if absent else ".")),
+        ("Z02_SHAP_summary_beeswarm", "SHAP summary (beeswarm)",
+         "Each dot is one mixture: its horizontal position is the SHAP value of that input, the change in predicted ln strength (top axis: the "
+         "equivalent multiplicative factor on strength) relative to the average prediction. Colour gives the input's own value (blue low, red high); "
+         "carbonation is categorical and is shown by level. Inputs are ordered by mean |SHAP|."),
+        ("Z03_SHAP_dependence_7d_vs_28d", "SHAP dependence plots, 7-day and 28-day models on one scale",
+         "SHAP value of each input against its value, for every mixture. Vertical spread at a given input value comes from interactions with the "
+         f"other inputs{add_txt}. Carbonation (right) is plotted by level, coloured by SS, with the level mean as a bar."),
+        ("Z04_SHAP_interaction_matrices", "SHAP interaction matrices",
+         "Mean absolute SHAP interaction values. The diagonal is the main effect of each input; each off-diagonal cell holds one half of the pair's "
+         "interaction (the full pair effect is twice the cell). A zero cell means the model has no term linking the two inputs."),
+        ("Z05_SHAP_interaction_dependence", "SHAP interaction dependence plots",
+         "Full interaction effect (both halves) for the key pairs. a: carbonation raises strength at low SS and lowers it at high SS in the 7-day "
+         "model; b: RCF helps more when carbonated; c: RCF helps more at low SS; d: in the paired model the 28-day advantage is largest at low SS."),
+        ("Z06_SHAP_waterfalls_selected_mixes", "Waterfall decompositions (MPa)",
+         "Exact Shapley decomposition of each model's median prediction in MPa for four mixtures: the highest-strength mix (25), a weak NaOH-only mix "
+         "(29), a carbonated high-RCF NaOH-only mix (30) and a carbonated silicate-rich mix (27). E[f] is the mean prediction over the 30 mixtures."),
+        ("Z07_SHAP_paired_model_age", "Paired model: curing age",
+         "a: SHAP value of curing age against SS, showing that the 7 → 28-day contribution is largest in NaOH-only mixes; b: SHAP value of SS "
+         "coloured by age, showing the flatter SS response at 28 days; c: SHAP value of RCF by carbonation level."),
+        ("Z08a_mean_abs_SHAP_importance_MPa", "Supplementary: importance on the MPa scale", "As Z01, with SHAP values of the median prediction in MPa."),
+        ("Z08b_SHAP_summary_beeswarm_MPa", "Supplementary: summary on the MPa scale",
+         "As Z02, with SHAP values in MPa. On this scale the log-linear models are no longer additive"
+         + (f", so even the {' and the '.join(add)} show{'s' if len(add) == 1 else ''} small interactions." if add else ".")),
+    ]
+
+
+def ranked(R, k):
+    """'SS (0.45), RCF (0.21), ...' for the inputs a model contains, by mean |SHAP|."""
+    pairs = sorted(((fn, m) for fn, m in zip(R[k]["features"], R[k]["ln"]["mean_abs"]) if m > 1e-12), key=lambda x: -x[1])
+    return pairs
 
 
 def main():
@@ -104,26 +124,65 @@ def main():
     ix_tab = table(ix, ["model", "pair", "half", "full", "fac"], ["Model", "Pair", "Mean |interaction|, per half", "Full pair effect", "Typical factor"],
                    num=["half", "full", "fac"], cls="small")
     cc = {k: R[k]["crosscheck"] for k in KEYS}
-    ccmax = max(max(c["max_abs_diff_values"], c["max_abs_diff_interactions"]) for c in cc.values())
+    if all(c.get("available") for c in cc.values()):
+        ccmax = max(max(c["max_abs_diff_values"], c["max_abs_diff_interactions"]) for c in cc.values())
+        xcheck = (f"The values agree with <code>shap.ExactExplainer</code> ({cc['7d']['shap_version']}) to within {ccmax:.1e} "
+                  f"for values and interaction values.")
+    else:
+        xcheck = "The optional cross-check against the <code>shap</code> package was not run (package not installed)."
+    add = [k for k in ("7d", "28d") if R[k].get("additive")]
+    analytic = "".join(f" For the additive {TITLE[k]} they also equal the closed-form contributions (difference "
+                       f"{R[k]['analytic_check_max_diff']:.1e})." for k in add)
     imp = {k: dict(zip(R[k]["features"], R[k]["ln"]["mean_abs"])) for k in KEYS}
     impM = {k: dict(zip(R[k]["features"], R[k]["MPa"]["mean_abs"])) for k in KEYS}
     first = {k: dict(zip(R[k]["features"], R[k]["ln"]["rank_first_share"])) for k in KEYS}
-    I7 = np.array(R["7d"]["ln"]["mean_abs_inter"]); f7 = R["7d"]["features"]
-    Ip = np.array(R["paired"]["ln"]["mean_abs_inter"]); fp_ = R["paired"]["features"]
+    CAPTIONS = captions(R)
+    with open(os.path.join(dz.ROOT, "results", "separate", "separate_results.json")) as f:
+        R_sep = json.load(f)
+    pred = {a: R_sep[a]["fit"]["predR2"] for a in ("7", "28")}
 
+    def pairs_txt(k):
+        """Non-zero interaction pairs of a model, largest first, as 'SS × Carbonation (0.123)' (full pair effect)."""
+        Mx = np.array(R[k]["ln"]["mean_abs_inter"]); f = R[k]["features"]
+        pr = sorted(((f"{f[a]} × {f[b]}", 2 * Mx[a, b]) for a in range(len(f)) for b in range(a + 1, len(f)) if Mx[a, b] > 1e-10),
+                    key=lambda x: -x[1])
+        return pr
+
+    def model_point(k):
+        rk = ranked(R, k)
+        top, rest = rk[0], rk[1:]
+        s = (f"{top[0]} contributes most (mean |SHAP| {top[1]:.2f} on the ln scale, about {impM[k][top[0]]:.1f} MPa; ranked first in "
+             f"{100 * first[k][top[0]]:.0f} % of refits)")
+        if rest:
+            s += ", followed by " + ", ".join(f"{fn} ({m:.2f})" for fn, m in rest)
+        s += "."
+        pr = pairs_txt(k)
+        if pr:
+            s += " Largest interaction: " + "; ".join(f"{p} ({v:.3f} for the pair)" for p, v in pr[:3]) + "."
+        else:
+            s += " The model has no interaction terms, so every interaction value is zero."
+        z = [fn for fn, m in zip(R[k]["features"], R[k]["ln"]["mean_abs"]) if m < 1e-12]
+        if z:
+            s += f" {' and '.join(z)} {'is' if len(z) == 1 else 'are'} not in the model."
+        return s
+
+    Ip = np.array(R["paired"]["ln"]["mean_abs_inter"]); fp_ = R["paired"]["features"]
+    age_pairs = [(fp_[b], 2 * Ip[fp_.index("Curing age"), b]) for b in range(len(fp_))
+                 if fp_[b] != "Curing age" and Ip[fp_.index("Curing age"), b] > 1e-10]
+    rkp = ranked(R, "paired")
     figs_html = "\n".join(
         f'<figure class="plate" id="{fn}"><img src="figures/{fn}.png" alt="{t}" loading="lazy"><figcaption><b>{fn.split("_")[0]}. {t}.</b> {c}</figcaption></figure>'
         for fn, t, c in CAPTIONS)
     key_points = f"""
 <ul class="kp">
-  <li><b>7-day model.</b> SS dominates (mean |SHAP| {imp['7d']['SS']:.2f} on the ln scale, about {impM['7d']['SS']:.1f} MPa; ranked first in {100 * first['7d']['SS']:.0f} % of refits), followed by RCF ({imp['7d']['RCF']:.2f}) and carbonation ({imp['7d']['Carbonation']:.2f}). The largest interaction is SS × carbonation ({2 * I7[f7.index('SS'), f7.index('Carbonation')]:.3f} for the pair), then RCF × carbonation and RCF × SS ({2 * I7[f7.index('RCF'), f7.index('Carbonation')]:.3f} each). A/B is not in the model.</li>
-  <li><b>28-day model.</b> SS ({imp['28d']['SS']:.2f}), RCF ({imp['28d']['RCF']:.2f}) and A/B ({imp['28d']['A/B']:.2f}) are closer together; SS is ranked first in {100 * first['28d']['SS']:.0f} % of refits and RCF in {100 * first['28d']['RCF']:.0f} %. Carbonation is not in the model and the model has no interactions, so every interaction value is zero.</li>
-  <li><b>Paired model.</b> Curing age ({imp['paired']['Curing age']:.2f}) is almost as influential as SS ({imp['paired']['SS']:.2f}). Its only interaction is with SS ({2 * Ip[fp_.index('SS'), fp_.index('Curing age')]:.3f} for the pair): the 28-day advantage is largest in NaOH-only mixes.</li>
+  <li><b>7-day model.</b> {model_point('7d')}</li>
+  <li><b>28-day model.</b> {model_point('28d')}</li>
+  <li><b>Paired model.</b> Inputs by mean |SHAP|: {', '.join(f'{fn} ({m:.2f})' for fn, m in rkp)}. Curing age interacts only with {' and '.join(f'{fn} ({v:.3f} for the pair)' for fn, v in age_pairs)}: the 28-day advantage is largest in NaOH-only mixes.</li>
 </ul>"""
     method = f"""
 <p>SHAP values here are exact interventional Shapley values of each fitted model, computed over all coalitions of its inputs (16 for four inputs, 32 with curing age) with the 30 real mixtures as the background set (60 mixture × age rows for the paired model). No sampling approximation is involved. The inputs are the actual model inputs: RCF (%), SS (%), A/B and carbonation. Carbonation is one categorical input with four levels (NC, 0.5 h, 1 h, 5 h). When it is absent from a coalition its level is taken from a background mixture, so its level indicators and its carbonated × RCF and carbonated × SS terms always move together. It is never treated as a number. The paired model adds curing age (7 or 28 d) as a fifth input. SHAP interaction values follow Lundberg et al. (2020).</p>
-<p>Values are computed on the ln-strength scale, where the models were fitted. On that scale the contributions add up exactly and the interaction values correspond one-to-one to the models' interaction terms. Axes also show the multiplicative factor exp(SHAP). The waterfalls and the supplementary figures use the MPa scale (median prediction). Checks: every decomposition satisfies Shapley efficiency to machine precision. The values agree with <code>shap.ExactExplainer</code> ({cc['7d']['shap_version']}) to within {ccmax:.1e} for values and interaction values. For the additive 28-day model they also equal the closed-form contributions (difference {R['28d']['analytic_check_max_diff']:.1e}). Importance intervals come from 1,000 case-bootstrap refits stratified by carbonation level ({R['paired']['n_boot']} usable for the paired model).</p>
-<p class="note">SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² 0.38 vs 0.91), so its SHAP pattern is less certain.</p>"""
+<p>Values are computed on the ln-strength scale, where the models were fitted. On that scale the contributions add up exactly and the interaction values correspond one-to-one to the models' interaction terms. Axes also show the multiplicative factor exp(SHAP). The waterfalls and the supplementary figures use the MPa scale (median prediction). Checks: every decomposition satisfies Shapley efficiency to machine precision. {xcheck}{analytic} Importance intervals come from 1,000 case-bootstrap refits stratified by carbonation level ({R['paired']['n_boot']} usable for the paired model).</p>
+<p class="note">SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² {pred['28']:.2f} vs {pred['7']:.2f}), so its SHAP pattern is less certain.</p>"""
 
     body = f"""
 <header class="top">

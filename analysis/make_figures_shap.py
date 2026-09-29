@@ -332,8 +332,9 @@ def fig_inter_dep(R):
     h2 = [Line2D([], [], marker="o", color=C7, ls="", ms=5, label="7 d"), Line2D([], [], marker="s", color=C28, ls="", ms=5, label="28 d")]
     fig.legend(handles=h1, loc="upper left", ncol=4, fontsize=7, title="Carbonation (a, b)", title_fontsize=7, bbox_to_anchor=(0.05, 1.12))
     fig.legend(handles=h2, loc="upper right", ncol=2, fontsize=7, title="Curing age (d)", title_fontsize=7, bbox_to_anchor=(0.97, 1.12))
-    fig.text(0.01, -0.05, "The 28-day model contains no interaction terms, so all of its interaction values are exactly zero on the ln scale "
-             "(Z04 b).", fontsize=7, color=INK2)
+    if R["28d"].get("additive"):
+        fig.text(0.01, -0.05, "The 28-day model contains no interaction terms, so all of its interaction values are exactly zero on the ln scale "
+                 "(Z04 b).", fontsize=7, color=INK2)
     fig.tight_layout()
     save(fig, "Z05_SHAP_interaction_dependence")
 

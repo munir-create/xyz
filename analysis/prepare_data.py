@@ -50,6 +50,20 @@ def main():
     diffs = pd.DataFrame(diffs)
     diffs.to_csv(os.path.join(OUT_T, "T00_changes_vs_previous_7d_data.csv"), index=False)
 
+    # ---- differences from the previous corrected data set (v1, used by the first paired model)
+    v1 = pd.read_csv(os.path.join(dz.ROOT, "data", "previous_corrected_v1.csv"))
+    diffs_v1 = []
+    for _, o in v1.iterrows():
+        n = d[d.mix == o.mix].iloc[0]
+        for col, nm in [("f7_mean", "7-day strength (MPa)"), ("f7_sd", "7-day SD (MPa)"),
+                        ("f28_mean", "28-day strength (MPa)"), ("f28_sd", "28-day SD (MPa)")]:
+            a, b = o[col], n[col]
+            if (pd.isna(a) and pd.isna(b)) or (not pd.isna(a) and not pd.isna(b) and np.isclose(a, b, atol=1e-9)):
+                continue
+            diffs_v1.append({"mix": int(o.mix), "variable": nm, "previous": a, "corrected": b, "change": b - a})
+    diffs_v1 = pd.DataFrame(diffs_v1)
+    diffs_v1.to_csv(os.path.join(OUT_T, "T00b_changes_vs_previous_corrected_data.csv"), index=False)
+
     # ---- pure error (replicate batches of the same nominal design point)
     g = d.dropna(subset=["replicate_group"])
     pe = {}
@@ -88,6 +102,11 @@ def main():
         "corr_ln7_ln28": float(np.corrcoef(d.l7, d.l28)[0, 1]),
         "pure_error": pe, "specimen_scatter": spec,
         "n_changes": int(len(diffs)),
+        "changes_vs_v1": {
+            "n_entries": int(len(diffs_v1)),
+            "mean_changes": {nm: {"n": int(len(g_)), "n_large": int((g_.change.abs() > 0.05).sum()),
+                                  "mixes_large": [int(x) for x in g_[g_.change.abs() > 0.05].mix]}
+                             for nm, g_ in diffs_v1[diffs_v1.variable.str.contains("strength")].groupby("variable")}},
     }
     with open(os.path.join(dz.ROOT, "results", "data_summary.json"), "w") as f:
         json.dump(summary, f, indent=1, default=float)
