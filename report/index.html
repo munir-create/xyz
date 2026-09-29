@@ -638,7 +638,8 @@ function drawGain(){
   const el = document.getElementById('gainChart'), c = COL();
   const F = frame(el, 330, {l: 54, r: 18, t: 12, b: 46});
   const x = d3.scaleLinear().domain([0, 75]).range([0, F.iw]);
-  const y = d3.scaleLog().domain([0.95, 4.6]).range([F.ih, 0]);
+  const gmin = d3.min(D.runs, r => r.f28 / r.f7), gmax = d3.max(D.runs, r => r.f28 / r.f7);
+  const y = d3.scaleLog().domain([Math.min(0.95, gmin * 0.93), Math.max(4.6, gmax * 1.08)]).range([F.ih, 0]);
   axes(F, x, y, 'Sodium silicate, SS (%)', 'Gain  f28 / f7', d3.format('.1f'));
   const G = D.gain, n = G.SS.length, idx = d3.range(n);
   F.g.append('path').attr('fill', c.age28).attr('opacity', 0.09).attr('d', d3.area().x(i => x(G.SS[i])).y0(i => y(G.blo[i])).y1(i => y(G.bhi[i]))(idx));
