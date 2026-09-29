@@ -12,115 +12,121 @@ Two models built separately, each from its own 30 results, with the same protoco
 
 Coded (A = (RCF − 30)/20, C = (A/B − 0.45)/0.03, D = (SS − 37.5)/37.5, K = 1 if carbonated):
 
-    ln f = 2.7343 + 0.0600·A + 0.7544·D + 0.0647·C0.5h − 0.0942·C1h + 0.0572·C5h − 0.1071·A·D − 0.6844·D² + 0.1964·K·A − 0.3340·K·D
+    ln f = 2.7295 + 0.0602·A + 0.7545·D + 0.0484·C0.5h − 0.0939·C1h + 0.0570·C5h − 0.1060·A·D − 0.6777·D² + 0.1995·K·A − 0.3358·K·D
 
 Actual units (RCF, SS in %; C[·] carbonation-level indicators):
 
-    ln(f7) = 1.04494 + 0.00835212·RCF + 0.0609018·SS − 1.4276×10^−4·RCF·SS − 4.8669×10^−4·SS² + 0.104207·C[0.5 h] − 0.0547479·C[1 h] + 0.0966465·C[5 h] + 0.00981798·K·RCF − 0.00890739·K·SS
+    ln(f7) = 1.04787 + 0.00831352·RCF + 0.0605047·SS − 1.414×10^−4·RCF·SS − 4.8191×10^−4·SS² + 0.0849998·C[0.5 h] − 0.0572559·C[1 h] + 0.0935896·C[5 h] + 0.00997314·K·RCF − 0.00895475·K·SS
 
 | Statistic | Value |
 |---|---|
-| R² / adjusted / predicted (leave one mixture out) | 0.95 / 0.93 / 0.91 |
+| R² / adjusted / predicted (leave one mixture out) | 0.96 / 0.94 / 0.91 |
 | Predicted R², leave one design point out | 0.92 |
-| Model F | F(9, 20) = 45.9, p < 0.001 |
-| Residual SD (ln) / CV | 0.153 / 15 % (replicate batches 0.194) |
-| RMSE fitted / left out (MPa) | 1.6 / 2.2 |
-| Lack of fit | p = 0.89 |
-| Adequate precision | 20.4 |
-| Box–Cox (selected model) | λ = 0.13 (95 % CI −0.19 to 0.47) |
-| Same model with each mixture deleted | 26 / 30 |
-| Exact model re-selected: residual bootstrap / subsamples | 38 % / 6 % |
-| Nested CV predicted R² of the AICc procedure | 0.86 |
-| Shapiro–Wilk / Breusch–Pagan | p = 0.83 / p = 0.17 |
-| Largest studentized residual | 1.99 (mix 19, Bonferroni p = 1.00) |
+| Model F | F(9, 20) = 49.6, p < 0.001 |
+| Residual SD (ln) / CV | 0.147 / 15 % (replicate batches 0.175) |
+| RMSE fitted / left out (MPa) | 1.5 / 2.1 |
+| Lack of fit | p = 0.82 |
+| Adequate precision | 21.2 |
+| Box–Cox (selected model) | λ = 0.16 (95 % CI −0.15 to 0.49) |
+| Same model with each mixture deleted | 29 / 30 |
+| Exact model re-selected: residual bootstrap / subsamples | 43 % / 9 % |
+| Nested CV predicted R² of the AICc procedure | 0.89 |
+| Shapiro–Wilk / Breusch–Pagan | p = 0.56 / p = 0.32 |
+| Largest studentized residual | 1.91 (mix 14, Bonferroni p = 1.00) |
 
 Cross-checks: BIC: RCF, SS, Carbonation (4 levels), RCF × SS, SS², Carbonated × RCF, Carbonated × SS; PRESS: RCF, A/B, SS, Carbonation (4 levels), RCF × A/B, RCF × SS, (A/B)², SS², Carbonated × RCF, Carbonated × SS; backward 0.10: RCF, SS, Carbonation (4 levels), RCF × SS, SS², Carbonated × RCF, Carbonated × SS; backward 0.05: RCF, SS, Carbonation (4 levels), RCF × SS, SS², Carbonated × RCF, Carbonated × SS.
 
 | Term | df | F | p | Evidence |
 |---|---|---|---|---|
-| RCF | 1 | 0.84 | 0.37 | Hierarchy |
-| SS | 1 | 135.30 | < 0.001 | Robust |
-| Carbonation (4 levels) | 3 | 1.56 | 0.23 | Hierarchy |
-| RCF × SS | 1 | 5.67 | 0.027 | Moderate |
-| SS² | 1 | 87.28 | < 0.001 | Robust |
-| Carbonated × RCF | 1 | 5.84 | 0.025 | Moderate |
-| Carbonated × SS | 1 | 16.63 | < 0.001 | Moderate |
+| RCF | 1 | 0.92 | 0.35 | Hierarchy |
+| SS | 1 | 147.19 | < 0.001 | Robust |
+| Carbonation (4 levels) | 3 | 1.59 | 0.22 | Hierarchy |
+| RCF × SS | 1 | 6.05 | 0.023 | Moderate |
+| SS² | 1 | 93.07 | < 0.001 | Robust |
+| Carbonated × RCF | 1 | 6.56 | 0.019 | Moderate |
+| Carbonated × SS | 1 | 18.28 | < 0.001 | Moderate |
 
 | Term (coded) | Estimate | SE | 95 % CI low | 95 % CI high | p |
 |---|---|---|---|---|---|
-| Intercept | 2.7343 | 0.0746 | 2.5787 | 2.8899 | < 0.001 |
-| RCF (A) | 0.0600 | 0.0656 | -0.0768 | 0.1967 | 0.37 |
-| SS (D) | 0.7544 | 0.0649 | 0.6191 | 0.8897 | < 0.001 |
-| Carb 0.5 h | 0.0647 | 0.0988 | -0.1414 | 0.2708 | 0.52 |
-| Carb 1 h | -0.0942 | 0.0762 | -0.2532 | 0.0647 | 0.23 |
-| Carb 5 h | 0.0572 | 0.0779 | -0.1054 | 0.2197 | 0.47 |
-| RCF·SS | -0.1071 | 0.0450 | -0.2009 | -0.0132 | 0.027 |
-| SS² | -0.6844 | 0.0733 | -0.8372 | -0.5316 | < 0.001 |
-| K·RCF | 0.1964 | 0.0812 | 0.0269 | 0.3658 | 0.025 |
-| K·SS | -0.3340 | 0.0819 | -0.5049 | -0.1632 | < 0.001 |
+| Intercept | 2.7295 | 0.0715 | 2.5802 | 2.8787 | < 0.001 |
+| RCF (A) | 0.0602 | 0.0629 | -0.0709 | 0.1913 | 0.35 |
+| SS (D) | 0.7545 | 0.0622 | 0.6248 | 0.8842 | < 0.001 |
+| Carb 0.5 h | 0.0484 | 0.0947 | -0.1492 | 0.2460 | 0.62 |
+| Carb 1 h | -0.0939 | 0.0731 | -0.2463 | 0.0585 | 0.21 |
+| Carb 5 h | 0.0570 | 0.0747 | -0.0989 | 0.2128 | 0.45 |
+| RCF·SS | -0.1060 | 0.0431 | -0.1960 | -0.0161 | 0.023 |
+| SS² | -0.6777 | 0.0702 | -0.8242 | -0.5311 | < 0.001 |
+| K·RCF | 0.1995 | 0.0779 | 0.0370 | 0.3620 | 0.019 |
+| K·SS | -0.3358 | 0.0785 | -0.4996 | -0.1720 | < 0.001 |
 
 ## 28-day model
 
-**ln(f28) ~ RCF + A/B + SS + RCF²**
+**ln(f28) ~ RCF + A/B + SS + Carbonation (4 levels) + RCF² + (A/B)²**
 
 Coded (A = (RCF − 30)/20, C = (A/B − 0.45)/0.03, D = (SS − 37.5)/37.5, K = 1 if carbonated):
 
-    ln f = 3.1763 + 0.0757·A − 0.1462·C + 0.2510·D − 0.3293·A²
+    ln f = 3.0167 + 0.1507·A − 0.1560·C + 0.2329·D + 0.3169·C0.5h − 0.2261·C1h − 0.2102·C5h − 0.2738·A² + 0.3172·C²
 
 Actual units (RCF, SS in %; C[·] carbonation-level indicators):
 
-    ln(f28) = 4.26393 + 0.0531733·RCF + 0.00669398·SS − 4.8733·A/B − 8.2315×10^−4·RCF²
+    ln(f28) = 75.6619 + 0.0485975·RCF + 0.00621023·SS − 322.446·A/B − 6.8438×10^−4·RCF² + 352.496·(A/B)² + 0.316901·C[0.5 h] − 0.226146·C[1 h] − 0.210182·C[5 h]
 
 | Statistic | Value |
 |---|---|
-| R² / adjusted / predicted (leave one mixture out) | 0.54 / 0.46 / 0.38 |
-| Predicted R², leave one design point out | 0.30 |
-| Model F | F(4, 25) = 7.2, p < 0.001 |
-| Residual SD (ln) / CV | 0.277 / 28 % (replicate batches 0.201) |
-| RMSE fitted / left out (MPa) | 5.6 / 6.4 |
-| Lack of fit | p = 0.17 |
-| Adequate precision | 8.9 |
-| Box–Cox (selected model) | λ = 0.01 (95 % CI −0.65 to 0.71) |
-| Same model with each mixture deleted | 25 / 30 |
-| Exact model re-selected: residual bootstrap / subsamples | 27 % / 21 % |
-| Nested CV predicted R² of the AICc procedure | 0.12 |
-| Shapiro–Wilk / Breusch–Pagan | p = 0.43 / p = 0.75 |
-| Largest studentized residual | 2.29 (mix 7, Bonferroni p = 0.93) |
+| R² / adjusted / predicted (leave one mixture out) | 0.71 / 0.60 / 0.43 |
+| Predicted R², leave one design point out | 0.34 |
+| Model F | F(8, 21) = 6.5, p < 0.001 |
+| Residual SD (ln) / CV | 0.227 / 23 % (replicate batches 0.193) |
+| RMSE fitted / left out (MPa) | 4.0 / 5.4 |
+| Lack of fit | p = 0.31 |
+| Adequate precision | 10.3 |
+| Box–Cox (selected model) | λ = −0.31 (95 % CI −0.99 to 0.43) |
+| Same model with each mixture deleted | 17 / 30 |
+| Exact model re-selected: residual bootstrap / subsamples | 28 % / 6 % |
+| Nested CV predicted R² of the AICc procedure | -0.13 |
+| Shapiro–Wilk / Breusch–Pagan | p = 0.74 / p = 0.10 |
+| Largest studentized residual | 2.33 (mix 25, Bonferroni p = 0.91) |
 
-Cross-checks: BIC: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)², SS², Carbonated × SS; PRESS: RCF, A/B, SS, Carbonation (4 levels), RCF × A/B, RCF², (A/B)², SS², Carbonated × SS; backward 0.10: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)²; backward 0.05: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)².
+Cross-checks: BIC: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)²; PRESS: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)²; backward 0.10: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)²; backward 0.05: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)².
 
 | Term | df | F | p | Evidence |
 |---|---|---|---|---|
-| RCF | 1 | 1.38 | 0.25 | Hierarchy |
-| A/B | 1 | 3.99 | 0.057 | Weak |
-| SS | 1 | 14.07 | < 0.001 | Robust |
-| RCF² | 1 | 7.11 | 0.013 | Moderate |
+| RCF | 1 | 6.83 | 0.016 | Moderate |
+| A/B | 1 | 6.69 | 0.017 | Moderate |
+| SS | 1 | 17.17 | < 0.001 | Robust |
+| Carbonation (4 levels) | 3 | 5.07 | 0.008 | Moderate |
+| RCF² | 1 | 7.18 | 0.014 | Moderate |
+| (A/B)² | 1 | 7.01 | 0.015 | Moderate |
 
 | Term (coded) | Estimate | SE | 95 % CI low | 95 % CI high | p |
 |---|---|---|---|---|---|
-| Intercept | 3.1763 | 0.0924 | 2.9861 | 3.3666 | < 0.001 |
-| RCF (A) | 0.0757 | 0.0645 | -0.0572 | 0.2086 | 0.25 |
-| A/B (C) | -0.1462 | 0.0732 | -0.2969 | 0.0045 | 0.057 |
-| SS (D) | 0.2510 | 0.0669 | 0.1132 | 0.3889 | < 0.001 |
-| RCF² | -0.3293 | 0.1234 | -0.5835 | -0.0750 | 0.013 |
+| Intercept | 3.0167 | 0.1201 | 2.7669 | 3.2665 | < 0.001 |
+| RCF (A) | 0.1507 | 0.0577 | 0.0308 | 0.2706 | 0.016 |
+| A/B (C) | -0.1560 | 0.0603 | -0.2814 | -0.0306 | 0.017 |
+| SS (D) | 0.2329 | 0.0562 | 0.1160 | 0.3498 | < 0.001 |
+| Carb 0.5 h | 0.3169 | 0.1529 | -0.0010 | 0.6348 | 0.051 |
+| Carb 1 h | -0.2261 | 0.1158 | -0.4669 | 0.0146 | 0.064 |
+| Carb 5 h | -0.2102 | 0.1155 | -0.4504 | 0.0301 | 0.083 |
+| RCF² | -0.2738 | 0.1022 | -0.4862 | -0.0613 | 0.014 |
+| (A/B)² | 0.3172 | 0.1198 | 0.0680 | 0.5665 | 0.015 |
 
 ## Terms side by side
 
 | Term | 7-day model: coefficient [95 % CI] | p | Evidence | 28-day model: coefficient [95 % CI] | p | Evidence |
 |---|---|---|---|---|---|---|
-| RCF | 0.060 [−0.077, 0.197] | 0.37 | Hierarchy | 0.076 [−0.057, 0.209] | 0.25 | Hierarchy |
-| A/B | if added: −0.017 [−0.105, 0.071] | 0.69 | Not detected | −0.146 [−0.297, 0.005] | 0.057 | Weak |
-| SS | 0.754 [0.619, 0.890] | < 0.001 | Robust | 0.251 [0.113, 0.389] | < 0.001 | Robust |
-| Carbonation (4 levels) | Carb 0.5 h: 0.065 [−0.141, 0.271]Carb 1 h: −0.094 [−0.253, 0.065]Carb 5 h: 0.057 [−0.105, 0.220] | 0.23 | Hierarchy | if added: Carb 0.5 h: 0.117 [−0.215, 0.449]Carb 1 h: −0.152 [−0.422, 0.117]Carb 5 h: −0.201 [−0.480, 0.077] | 0.17 | Not detected |
-| RCF × A/B | if added: 0.076 [−0.028, 0.180] | 0.30 | Not detected | if added: 0.110 [−0.074, 0.294] | 0.23 | Not detected |
-| RCF × SS | −0.107 [−0.201, −0.013] | 0.027 | Moderate | if added: −0.019 [−0.187, 0.150] | 0.82 | Not detected |
-| A/B × SS | if added: −0.010 [−0.125, 0.106] | 0.91 | Not detected | if added: 0.021 [−0.178, 0.220] | 0.83 | Not detected |
-| RCF² | if added: −0.054 [−0.205, 0.097] | 0.46 | Not detected | −0.329 [−0.583, −0.075] | 0.013 | Moderate |
-| (A/B)² | if added: 0.112 [−0.064, 0.288] | 0.40 | Not detected | if added: 0.087 [−0.161, 0.335] | 0.48 | Not detected |
-| SS² | −0.684 [−0.837, −0.532] | < 0.001 | Robust | if added: −0.178 [−0.439, 0.083] | 0.17 | Not detected |
-| Carbonated × RCF | 0.196 [0.027, 0.366] | 0.025 | Moderate | if added: 0.030 [−0.265, 0.325] | 0.29 | Not detected |
-| Carbonated × A/B | if added: 0.029 [−0.170, 0.228] | 0.88 | Not detected | if added: 0.075 [−0.254, 0.404] | 0.27 | Not detected |
-| Carbonated × SS | −0.334 [−0.505, −0.163] | < 0.001 | Moderate | if added: −0.106 [−0.396, 0.185] | 0.24 | Not detected |
+| RCF | 0.060 [−0.071, 0.191] | 0.35 | Hierarchy | 0.151 [0.031, 0.271] | 0.016 | Moderate |
+| A/B | if added: −0.017 [−0.101, 0.067] | 0.68 | Not detected | −0.156 [−0.281, −0.031] | 0.017 | Moderate |
+| SS | 0.754 [0.625, 0.884] | < 0.001 | Robust | 0.233 [0.116, 0.350] | < 0.001 | Robust |
+| Carbonation (4 levels) | Carb 0.5 h: 0.048 [−0.149, 0.246]Carb 1 h: −0.094 [−0.246, 0.059]Carb 5 h: 0.057 [−0.099, 0.213] | 0.22 | Hierarchy | Carb 0.5 h: 0.317 [−0.001, 0.635]Carb 1 h: −0.226 [−0.467, 0.015]Carb 5 h: −0.210 [−0.450, 0.030] | 0.008 | Moderate |
+| RCF × A/B | if added: 0.076 [−0.023, 0.175] | 0.28 | Not detected | if added: 0.091 [−0.061, 0.243] | 0.23 | Not detected |
+| RCF × SS | −0.106 [−0.196, −0.016] | 0.023 | Moderate | if added: −0.020 [−0.161, 0.121] | 0.77 | Not detected |
+| A/B × SS | if added: −0.010 [−0.120, 0.101] | 0.90 | Not detected | if added: 0.014 [−0.151, 0.180] | 0.86 | Not detected |
+| RCF² | if added: −0.064 [−0.208, 0.080] | 0.37 | Not detected | −0.274 [−0.486, −0.061] | 0.014 | Moderate |
+| (A/B)² | if added: 0.113 [−0.054, 0.281] | 0.35 | Not detected | 0.317 [0.068, 0.566] | 0.015 | Moderate |
+| SS² | −0.678 [−0.824, −0.531] | < 0.001 | Robust | if added: −0.090 [−0.322, 0.141] | 0.43 | Not detected |
+| Carbonated × RCF | 0.199 [0.037, 0.362] | 0.019 | Moderate | if added: −0.008 [−0.265, 0.249] | 0.95 | Not detected |
+| Carbonated × A/B | if added: 0.030 [−0.161, 0.221] | 0.87 | Not detected | if added: 0.103 [−0.180, 0.385] | 0.46 | Not detected |
+| Carbonated × SS | −0.336 [−0.500, −0.172] | < 0.001 | Moderate | if added: −0.164 [−0.414, 0.087] | 0.19 | Not detected |
 
 ## Trends side by side
 
@@ -128,72 +134,74 @@ Cross-checks: BIC: RCF, A/B, SS, Carbonation (4 levels), RCF², (A/B)², SS², C
 
 | Carbonation | RCF | 7 d SS at max | 28 d SS at max | 7 d f(SS0)/f(max) | 28 d f(SS0)/f(max) | 7 d f(SS/SH=2)/f(max) | 28 d f(SS/SH=2)/f(max) |
 |---|---|---|---|---|---|---|---|
-| NC | 10 | 61 % [52–72] | 75 % (edge)* | ×0.16 [0.12–0.22] | ×0.61 [0.46–0.80] | ×0.99 [0.95–1.03] | ×0.95 [0.92–0.98] |
-| NC | 30 | 58 % [51–67] | 75 % (edge)* | ×0.19 [0.15–0.24] | ×0.61 [0.46–0.80] | ×0.97 [0.91–1.02] | ×0.95 [0.92–0.98] |
-| NC | 50 | 55 % [46–64] | 75 % (edge)* | ×0.23 [0.17–0.30] | ×0.61 [0.46–0.80] | ×0.94 [0.87–1.01] | ×0.95 [0.92–0.98] |
-| 1 h | 10 | 52 % [42–58] | 75 % (edge)* | ×0.27 [0.22–0.33] | ×0.61 [0.46–0.80] | ×0.90 [0.82–0.99] | ×0.95 [0.92–0.98] |
-| 1 h | 30 | 49 % [42–54] | 75 % (edge)* | ×0.31 [0.27–0.36] | ×0.61 [0.46–0.80] | ×0.86 [0.77–0.96] | ×0.95 [0.92–0.98] |
-| 1 h | 50 | 46 % [40–51] | 75 % (edge)* | ×0.36 [0.29–0.43] | ×0.61 [0.46–0.80] | ×0.81 [0.71–0.93] | ×0.95 [0.92–0.98] |
+| NC | 10 | 61 % [52–72] | 75 % (edge)* | ×0.16 [0.12–0.21] | ×0.63 [0.50–0.79] | ×0.99 [0.95–1.02] | ×0.95 [0.93–0.97] |
+| NC | 30 | 58 % [52–67] | 75 % (edge)* | ×0.19 [0.15–0.24] | ×0.63 [0.50–0.79] | ×0.97 [0.92–1.02] | ×0.95 [0.93–0.97] |
+| NC | 50 | 56 % [46–64] | 75 % (edge)* | ×0.23 [0.18–0.30] | ×0.63 [0.50–0.79] | ×0.94 [0.87–1.01] | ×0.95 [0.93–0.97] |
+| 1 h | 10 | 52 % [42–58] | 75 % (edge)* | ×0.27 [0.22–0.33] | ×0.63 [0.50–0.79] | ×0.90 [0.82–0.99] | ×0.95 [0.93–0.97] |
+| 1 h | 30 | 49 % [42–54] | 75 % (edge)* | ×0.31 [0.27–0.36] | ×0.63 [0.50–0.79] | ×0.86 [0.78–0.95] | ×0.95 [0.93–0.97] |
+| 1 h | 50 | 46 % [40–51] | 75 % (edge)* | ×0.36 [0.30–0.43] | ×0.63 [0.50–0.79] | ×0.82 [0.72–0.92] | ×0.95 [0.93–0.97] |
 
 ### RCF 50 % / RCF 10 %
 
 | Carbonation | SS | 7-day model | 28-day model |
 |---|---|---|---|
-| NC | 0 | ×1.40 [1.00–1.95], p = 0.048 | ×1.16 [0.89–1.52], p = 0.25 |
-| NC | 25 | ×1.21 [0.91–1.60], p = 0.17 | ×1.16 [0.89–1.52], p = 0.25 |
-| NC | 50 | ×1.05 [0.79–1.39], p = 0.72 | ×1.16 [0.89–1.52], p = 0.25 |
-| NC | 75 | ×0.91 [0.65–1.27], p = 0.56 | ×1.16 [0.89–1.52], p = 0.25 |
-| 1 h | 0 | ×2.07 [1.63–2.62], p < 0.001 | ×1.16 [0.89–1.52], p = 0.25 |
-| 1 h | 25 | ×1.79 [1.48–2.18], p < 0.001 | ×1.16 [0.89–1.52], p = 0.25 |
-| 1 h | 50 | ×1.55 [1.24–1.95], p < 0.001 | ×1.16 [0.89–1.52], p = 0.25 |
-| 1 h | 75 | ×1.35 [0.99–1.83], p = 0.057 | ×1.16 [0.89–1.52], p = 0.25 |
+| NC | 0 | ×1.39 [1.01–1.92], p = 0.041 | ×1.35 [1.06–1.72], p = 0.016 |
+| NC | 25 | ×1.21 [0.93–1.58], p = 0.15 | ×1.35 [1.06–1.72], p = 0.016 |
+| NC | 50 | ×1.05 [0.80–1.38], p = 0.70 | ×1.35 [1.06–1.72], p = 0.016 |
+| NC | 75 | ×0.91 [0.66–1.25], p = 0.55 | ×1.35 [1.06–1.72], p = 0.016 |
+| 1 h | 0 | ×2.08 [1.66–2.61], p < 0.001 | ×1.35 [1.06–1.72], p = 0.016 |
+| 1 h | 25 | ×1.80 [1.50–2.17], p < 0.001 | ×1.35 [1.06–1.72], p = 0.016 |
+| 1 h | 50 | ×1.57 [1.26–1.94], p < 0.001 | ×1.35 [1.06–1.72], p = 0.016 |
+| 1 h | 75 | ×1.36 [1.01–1.83], p = 0.042 | ×1.35 [1.06–1.72], p = 0.016 |
 
 | Carbonation | SS | 7 d RCF at max | 28 d RCF at max |
 |---|---|---|---|
-| NC | 0 | 50 % (edge) | 32 % [28–39] |
-| NC | 37.5 | 50 % (edge) | 32 % [28–39] |
-| NC | 75 | 10 % (edge) | 32 % [28–39] |
-| 1 h | 0 | 50 % (edge) | 32 % [28–39] |
-| 1 h | 37.5 | 50 % (edge) | 32 % [28–39] |
-| 1 h | 75 | 50 % (edge) | 32 % [28–39] |
+| NC | 0 | 50 % (edge) | 36 % [31–50] |
+| NC | 37.5 | 50 % (edge) | 36 % [31–50] |
+| NC | 75 | 10 % (edge) | 36 % [31–50] |
+| 1 h | 0 | 50 % (edge) | 36 % [31–50] |
+| 1 h | 37.5 | 50 % (edge) | 36 % [31–50] |
+| 1 h | 75 | 50 % (edge) | 36 % [31–50] |
 
 ### Carbonated (1 h) / NC
 
 | RCF | SS | 7-day model | 28-day model |
 |---|---|---|---|
-| 10 | 0 | ×1.04 [0.78–1.41], p = 0.76 | 1 (not in model) |
-| 10 | 25 | ×0.84 [0.65–1.07], p = 0.15 | 1 (not in model) |
-| 10 | 50 | ×0.67 [0.52–0.86], p = 0.003 | 1 (not in model) |
-| 10 | 75 | ×0.54 [0.40–0.72], p < 0.001 | 1 (not in model) |
-| 30 | 0 | ×1.27 [1.01–1.60], p = 0.042 | 1 (not in model) |
-| 30 | 25 | ×1.02 [0.86–1.20], p = 0.83 | 1 (not in model) |
-| 30 | 50 | ×0.81 [0.69–0.97], p = 0.020 | 1 (not in model) |
-| 30 | 75 | ×0.65 [0.51–0.83], p = 0.001 | 1 (not in model) |
-| 50 | 0 | ×1.55 [1.18–2.04], p = 0.003 | 1 (not in model) |
-| 50 | 25 | ×1.24 [0.99–1.55], p = 0.063 | 1 (not in model) |
-| 50 | 50 | ×0.99 [0.79–1.25], p = 0.93 | 1 (not in model) |
-| 50 | 75 | ×0.79 [0.60–1.05], p = 0.10 | 1 (not in model) |
+| 10 | 0 | ×1.04 [0.78–1.39], p = 0.76 | ×0.80 [0.63–1.01], p = 0.064 |
+| 10 | 25 | ×0.83 [0.66–1.06], p = 0.13 | ×0.80 [0.63–1.01], p = 0.064 |
+| 10 | 50 | ×0.67 [0.52–0.85], p = 0.002 | ×0.80 [0.63–1.01], p = 0.064 |
+| 10 | 75 | ×0.53 [0.40–0.71], p < 0.001 | ×0.80 [0.63–1.01], p = 0.064 |
+| 30 | 0 | ×1.27 [1.02–1.59], p = 0.033 | ×0.80 [0.63–1.01], p = 0.064 |
+| 30 | 25 | ×1.02 [0.87–1.20], p = 0.82 | ×0.80 [0.63–1.01], p = 0.064 |
+| 30 | 50 | ×0.81 [0.69–0.96], p = 0.016 | ×0.80 [0.63–1.01], p = 0.064 |
+| 30 | 75 | ×0.65 [0.52–0.82], p < 0.001 | ×0.80 [0.63–1.01], p = 0.064 |
+| 50 | 0 | ×1.55 [1.19–2.02], p = 0.002 | ×0.80 [0.63–1.01], p = 0.064 |
+| 50 | 25 | ×1.24 [1.00–1.54], p = 0.049 | ×0.80 [0.63–1.01], p = 0.064 |
+| 50 | 50 | ×0.99 [0.80–1.24], p = 0.95 | ×0.80 [0.63–1.01], p = 0.064 |
+| 50 | 75 | ×0.79 [0.61–1.04], p = 0.091 | ×0.80 [0.63–1.01], p = 0.064 |
 
 ### Carbonation duration
 
 | Contrast | 7-day model | 28-day model |
 |---|---|---|
-| 1 h / 0.5 h | ×0.85 [0.70–1.05], p = 0.12 | 1 (not in model) |
-| 5 h / 0.5 h | ×0.99 [0.82–1.21], p = 0.94 | 1 (not in model) |
-| 5 h / 1 h | ×1.16 [0.99–1.36], p = 0.062 | 1 (not in model) |
+| 1 h / 0.5 h | ×0.87 [0.71–1.05], p = 0.14 | ×0.58 [0.41–0.82], p = 0.004 |
+| 5 h / 0.5 h | ×1.01 [0.84–1.22], p = 0.93 | ×0.59 [0.44–0.80], p = 0.002 |
+| 5 h / 1 h | ×1.16 [1.00–1.36], p = 0.053 | ×1.02 [0.79–1.30], p = 0.89 |
 
 ### A/B 0.42 / 0.48
 
-7-day model: 1 (not in model); 28-day model: ×1.34 [0.99–1.81], p = 0.057.
+7-day model: 1 (not in model); 28-day model: ×1.37 [1.06–1.76], p = 0.017.
 
 ### Best combination per carbonation level
 
 | Carbonation | 7 d at | 7 d median [CI] | 7 d PI | 28 d at | 28 d median [CI] | 28 d PI |
 |---|---|---|---|---|---|---|
-| NC | RCF 50, SS 55 | 19.1 [15.6–23.2] | 13.1–27.8 | RCF 32, SS 75, A/B 0.42 | 35.8 [27.2–47.2] | 19.0–67.5 |
-| 0.5 h | RCF 50, SS 46 | 22.0 [17.4–27.8] | 14.8–32.7 | RCF 32, SS 75, A/B 0.42 | 35.8 [27.2–47.2] | 19.0–67.5 |
-| 1 h | RCF 50, SS 46 | 18.8 [16.1–21.9] | 13.2–26.8 | RCF 32, SS 75, A/B 0.42 | 35.8 [27.2–47.2] | 19.0–67.5 |
-| 5 h | RCF 50, SS 46 | 21.8 [18.1–26.3] | 15.1–31.6 | RCF 32, SS 75, A/B 0.42 | 35.8 [27.2–47.2] | 19.0–67.5 |
+| NC | RCF 50, SS 56 | 19.0 [15.7–23.0] | 13.3–27.3 | RCF 36, SS 75, A/B 0.42 | 42.2 [31.3–57.0] | 24.2–73.9 |
+| 0.5 h | RCF 50, SS 46 | 21.6 [17.3–27.1] | 14.8–31.6 | RCF 36, SS 75, A/B 0.42 | 58.0 [37.9–88.8] † | 30.7–109.6 |
+| 1 h | RCF 50, SS 46 | 18.8 [16.2–21.8] | 13.3–26.4 | RCF 36, SS 75, A/B 0.42 | 33.7 [26.0–43.7] | 19.7–57.8 |
+| 5 h | RCF 50, SS 46 | 21.8 [18.2–26.1] | 15.3–31.1 | RCF 36, SS 75, A/B 0.42 | 34.2 [25.0–46.9] | 19.4–60.4 |
+
+† Outside the region the data support (leverage above the largest design leverage): 28 d, 0.5 h. Treat these maxima as extrapolations. The 28-day maximum sits at the edge of the range of SS (no SS² term) and A/B (A/B² is positive, so A/B has a minimum inside the range).
 
 ## Files
 

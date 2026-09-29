@@ -1,7 +1,7 @@
-23:03:41 --- 7-day model
-23:03:42   final: ['A', 'D', 'Carb', 'AD', 'D2', 'KA', 'KD']
-23:04:00   resampling (2000 x 3)
-23:05:19 --- 28-day model
-23:05:20   final: ['A', 'C', 'D', 'A2']
-23:05:38   resampling (2000 x 3)
-23:06:56 done in 194 s -> results/separate/separate_results.json
+08:26:21 --- 7-day model
+08:26:22   final: ['A', 'D', 'Carb', 'AD', 'D2', 'KA', 'KD']
+08:26:40   resampling (2000 x 3)
+08:28:03 --- 28-day model
+08:28:03   final: ['A', 'C', 'D', 'Carb', 'A2', 'C2']
+08:28:21   resampling (2000 x 3)
+08:29:35 done in 194 s -> results/separate/separate_results.json

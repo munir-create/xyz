@@ -250,7 +250,15 @@ def key_numbers(R, ex):
     ch = pd.read_csv(os.path.join(RES, "tables", "T00_changes_vs_previous_7d_data.csv"))
     ch7 = ch[ch.variable == "7-day strength (MPa)"]
     j = ch7.change.abs().idxmax()
-    K["t00_big"] = f"the 7-day strength of mix {int(ch7.loc[j, 'mix'])} ({ch7.loc[j, 'previous']:.2f} → {ch7.loc[j, 'corrected']:.2f} MPa)"
+    if abs(ch7.loc[j, "change"]) > 0.015:
+        K["t00_big"] = (f"The largest strength change is the 7-day strength of mix {int(ch7.loc[j, 'mix'])} "
+                        f"({ch7.loc[j, 'previous']:.2f} → {ch7.loc[j, 'corrected']:.2f} MPa)")
+    else:
+        K["t00_big"] = f"The 7-day strengths differ only by rounding (at most {abs(ch7.change).max():.2f} MPa, {len(ch7)} mixes)"
+    # sign of the interaction effects at 7 and 28 d (age-specific refit)
+    agi = a.loc[[c for c in ("AD", "KA", "KD") if c in a.index]]
+    K["int_same_sign"] = bool((np.sign(agi.eff7) == np.sign(agi.eff28)).all())
+    K["c5_sign_flip"] = bool(np.sign(a.loc["Carb[5 h]", "eff7"]) != np.sign(a.loc["Carb[5 h]", "eff28"]))
     K["t00_n7"] = int(len(ch7))
     v1 = pd.read_csv(os.path.join(RES, "tables", "T00b_changes_vs_previous_corrected_data.csv"))
     K["v1_n"] = int(len(v1))

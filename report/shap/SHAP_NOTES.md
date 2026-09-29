@@ -4,51 +4,51 @@
 
 ## Key points
 
-* 7-day model. SS dominates (mean |SHAP| 0.50 on the ln scale, about 4.6 MPa; ranked first in 99 % of refits), followed by RCF (0.15) and carbonation (0.08). The largest interaction is SS × carbonation (0.095 for the pair), then RCF × carbonation and RCF × SS (0.057 each). A/B is not in the model.
-* 28-day model. SS (0.17), RCF (0.14) and A/B (0.08) are closer together; SS is ranked first in 66 % of refits and RCF in 29 %. Carbonation is not in the model and the model has no interactions, so every interaction value is zero.
-* Paired model. Curing age (0.34) is almost as influential as SS (0.36). Its only interaction is with SS (0.137 for the pair): the 28-day advantage is largest in NaOH-only mixes.
+* 7-day model. SS contributes most (mean |SHAP| 0.50 on the ln scale, about 4.6 MPa; ranked first in 99 % of refits), followed by RCF (0.15) and Carbonation (0.08). Largest interactions: SS × Carbonation (0.095 for the pair); RCF × Carbonation (0.058 for the pair); RCF × SS (0.055 for the pair). A/B is not in the model.
+* 28-day model. Carbonation is marginally first, but no input clearly dominates (mean |SHAP| 0.17 on the ln scale, about 3.2 MPa; ranked first in 35 % of refits), followed by SS (0.16), RCF (0.15) and A/B (0.14). The model has no interaction terms, so every interaction value is zero.
+* Paired model. Inputs by mean |SHAP|: SS (0.35), Curing age (0.32), RCF (0.16), Carbonation (0.08). Curing age interacts only with SS (0.146 for the pair): the 28-day advantage is largest in NaOH-only mixes.
 
 ## Method
 
 SHAP values here are exact interventional Shapley values of each fitted model, computed over all coalitions of its inputs (16 for four inputs, 32 with curing age) with the 30 real mixtures as the background set (60 mixture × age rows for the paired model). No sampling approximation is involved. The inputs are the actual model inputs: RCF (%), SS (%), A/B and carbonation. Carbonation is one categorical input with four levels (NC, 0.5 h, 1 h, 5 h). When it is absent from a coalition its level is taken from a background mixture, so its level indicators and its carbonated × RCF and carbonated × SS terms always move together. It is never treated as a number. The paired model adds curing age (7 or 28 d) as a fifth input. SHAP interaction values follow Lundberg et al. (2020).
 
-Values are computed on the ln-strength scale, where the models were fitted. On that scale the contributions add up exactly and the interaction values correspond one-to-one to the models' interaction terms. Axes also show the multiplicative factor exp(SHAP). The waterfalls and the supplementary figures use the MPa scale (median prediction). Checks: every decomposition satisfies Shapley efficiency to machine precision. The values agree with shap.ExactExplainer (0.51.0) to within 1.9e-15 for values and interaction values. For the additive 28-day model they also equal the closed-form contributions (difference 9.2e-16). Importance intervals come from 1,000 case-bootstrap refits stratified by carbonation level (999 usable for the paired model).
+Values are computed on the ln-strength scale, where the models were fitted. On that scale the contributions add up exactly and the interaction values correspond one-to-one to the models' interaction terms. Axes also show the multiplicative factor exp(SHAP). The waterfalls and the supplementary figures use the MPa scale (median prediction). Checks: every decomposition satisfies Shapley efficiency to machine precision. The values agree with shap.ExactExplainer (0.51.0) to within 2.7e-15 for values and interaction values. For the additive 28-day model they also equal the closed-form contributions (difference 9.0e-16). Importance intervals come from 1,000 case-bootstrap refits stratified by carbonation level (999 usable for the paired model).
 
-SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² 0.38 vs 0.91), so its SHAP pattern is less certain.
+SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² of the fixed terms 0.43 vs 0.91; −0.13 for the 28-day model when its selection is repeated in each fold), so its SHAP pattern is less certain.
 
 ## Mean |SHAP| importance
 
 | Model | Input | Mean abs SHAP, ln [95 % boot] | Typical factor | Mean abs SHAP, MPa | Ranked first |
 |---|---|---|---|---|---|
-| 7-day model | RCF | 0.152 [0.088–0.216] | ×1.16 | 1.37 [0.76–2.30] | 0 % |
-| 7-day model | SS | 0.498 [0.428–0.557] | ×1.65 | 4.59 [3.96–5.57] | 99 % |
+| 7-day model | RCF | 0.153 [0.089–0.218] | ×1.17 | 1.38 [0.79–2.34] | 0 % |
+| 7-day model | SS | 0.496 [0.423–0.552] | ×1.64 | 4.56 [3.94–5.49] | 99 % |
 | 7-day model | A/B | 0 (not in model) | – | 0 | 0 % |
-| 7-day model | Carbonation | 0.082 [0.055–0.195] | ×1.09 | 0.87 [0.60–2.59] | 1 % |
-| 28-day model | RCF | 0.136 [0.055–0.220] | ×1.15 | 2.60 [1.00–4.37] | 29 % |
-| 28-day model | SS | 0.168 [0.089–0.253] | ×1.18 | 3.25 [1.71–5.14] | 66 % |
-| 28-day model | A/B | 0.083 [0.011–0.153] | ×1.09 | 1.63 [0.22–2.98] | 5 % |
-| 28-day model | Carbonation | 0 (not in model) | – | 0 | 0 % |
-| Paired 7/28-day model | RCF | 0.153 [0.080–0.228] | ×1.16 | 2.06 [1.09–3.36] | 0 % |
-| Paired 7/28-day model | SS | 0.361 [0.280–0.439] | ×1.44 | 4.31 [3.24–6.02] | 68 % |
+| 7-day model | Carbonation | 0.080 [0.055–0.192] | ×1.08 | 0.84 [0.59–2.46] | 1 % |
+| 28-day model | RCF | 0.151 [0.081–0.232] | ×1.16 | 2.71 [1.42–4.39] | 16 % |
+| 28-day model | SS | 0.156 [0.076–0.240] | ×1.17 | 2.92 [1.50–4.59] | 28 % |
+| 28-day model | A/B | 0.140 [0.072–0.244] | ×1.15 | 2.81 [1.36–5.17] | 20 % |
+| 28-day model | Carbonation | 0.167 [0.094–0.263] | ×1.18 | 3.21 [1.69–5.38] | 35 % |
+| Paired 7/28-day model | RCF | 0.156 [0.083–0.229] | ×1.17 | 2.05 [1.10–3.22] | 0 % |
+| Paired 7/28-day model | SS | 0.350 [0.271–0.428] | ×1.42 | 4.03 [2.95–5.65] | 75 % |
 | Paired 7/28-day model | A/B | 0 (not in model) | – | 0 | 0 % |
-| Paired 7/28-day model | Carbonation | 0.083 [0.055–0.175] | ×1.09 | 1.23 [0.82–3.02] | 0 % |
-| Paired 7/28-day model | Curing age | 0.338 [0.295–0.384] | ×1.40 | 4.34 [3.50–5.83] | 32 % |
+| Paired 7/28-day model | Carbonation | 0.082 [0.053–0.178] | ×1.09 | 1.19 [0.80–2.93] | 0 % |
+| Paired 7/28-day model | Curing age | 0.318 [0.277–0.362] | ×1.37 | 3.91 [3.16–5.22] | 25 % |
 
 ## Non-zero interactions (ln scale)
 
 | Model | Pair | Per half | Full pair | Factor |
 |---|---|---|---|---|
-| 7-day model | RCF × SS | 0.028 | 0.055 | ×1.06 |
-| 7-day model | RCF × Carbonation | 0.028 | 0.057 | ×1.06 |
-| 7-day model | SS × Carbonation | 0.047 | 0.095 | ×1.10 |
-| Paired 7/28-day model | RCF × SS | 0.028 | 0.056 | ×1.06 |
-| Paired 7/28-day model | RCF × Carbonation | 0.029 | 0.057 | ×1.06 |
-| Paired 7/28-day model | SS × Carbonation | 0.048 | 0.095 | ×1.10 |
-| Paired 7/28-day model | SS × Curing age | 0.069 | 0.137 | ×1.15 |
+| 7-day model | RCF × SS | 0.027 | 0.055 | ×1.06 |
+| 7-day model | RCF × Carbonation | 0.029 | 0.058 | ×1.06 |
+| 7-day model | SS × Carbonation | 0.048 | 0.095 | ×1.10 |
+| Paired 7/28-day model | RCF × SS | 0.028 | 0.057 | ×1.06 |
+| Paired 7/28-day model | RCF × Carbonation | 0.030 | 0.060 | ×1.06 |
+| Paired 7/28-day model | SS × Carbonation | 0.049 | 0.098 | ×1.10 |
+| Paired 7/28-day model | SS × Curing age | 0.073 | 0.146 | ×1.16 |
 
 ## Figures
 
-* `results/shap/figures/Z01_mean_abs_SHAP_importance.png|pdf` — **Mean |SHAP| feature importance.** Average absolute SHAP value of each input over the 30 mixtures (60 mixture × age rows for the paired model), on the ln-strength scale. Whiskers: 95 % interval over 1,000 case-bootstrap refits stratified by carbonation level. The intervals are conditional on the selected terms, so an input the model does not contain has zero importance by construction (A/B in the 7-day model, carbonation in the 28-day model).
+* `results/shap/figures/Z01_mean_abs_SHAP_importance.png|pdf` — **Mean |SHAP| feature importance.** Average absolute SHAP value of each input over the 30 mixtures (60 mixture × age rows for the paired model), on the ln-strength scale. Whiskers: 95 % interval over 1,000 case-bootstrap refits stratified by carbonation level. The intervals are conditional on the selected terms, so an input the model does not contain has zero importance by construction (A/B in the 7-day model).
 * `results/shap/figures/Z02_SHAP_summary_beeswarm.png|pdf` — **SHAP summary (beeswarm).** Each dot is one mixture: its horizontal position is the SHAP value of that input, the change in predicted ln strength (top axis: the equivalent multiplicative factor on strength) relative to the average prediction. Colour gives the input's own value (blue low, red high); carbonation is categorical and is shown by level. Inputs are ordered by mean |SHAP|.
 * `results/shap/figures/Z03_SHAP_dependence_7d_vs_28d.png|pdf` — **SHAP dependence plots, 7-day and 28-day models on one scale.** SHAP value of each input against its value, for every mixture. Vertical spread at a given input value comes from interactions with the other inputs; the 28-day model is additive, so its points fall on single curves. Carbonation (right) is plotted by level, coloured by SS, with the level mean as a bar.
 * `results/shap/figures/Z04_SHAP_interaction_matrices.png|pdf` — **SHAP interaction matrices.** Mean absolute SHAP interaction values. The diagonal is the main effect of each input; each off-diagonal cell holds one half of the pair's interaction (the full pair effect is twice the cell). A zero cell means the model has no term linking the two inputs.

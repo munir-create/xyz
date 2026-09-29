@@ -4,21 +4,70 @@
 
 ## Summary
 
-A single linear mixed model describes the 7- and 28-day compressive strength of the 30 mixtures (60 results). Curing age is a two-level factor, carbonation a four-level factor (NC, 0.5 h, 1 h, 5 h), and the two results of each mixture are a correlated pair. The model was chosen by an exhaustive AICc search over 53,105 hierarchical models and two within-mixture covariance structures. It was checked with nested cross-validation, bootstrap and subsample re-selection, lack-of-fit tests, residual diagnostics and 17 alternative analyses.
+A single linear mixed model describes the 7- and 28-day compressive strength of the 30 mixtures (60 results), using the updated corrected results (`data/source/30_mixes_7_and_28_days_strength_results.pdf`). Curing age is a two-level factor, carbonation a four-level factor (NC, 0.5 h, 1 h, 5 h), and the two results of each mixture are a correlated pair. The model was chosen by an exhaustive AICc search over 53,105 hierarchical models and two within-mixture covariance structures. It was checked with nested cross-validation, bootstrap and subsample re-selection, lack-of-fit tests, residual diagnostics and 18 alternative analyses.
 
 * **SS** is the dominant factor at both ages, with a peak at mid-range SS (SS p < 0.001; SS² p < 0.001).
-* **Curing age interacts with SS only.** The strength gain f28/f7 is 2.92 (95 % CI 2.44–3.49) at SS 0 %, reaches a minimum of 1.45 near SS 55 % and is 1.58 (1.24–2.01) at SS 75 % (SS × Age p < 0.001, SS² × Age p = 0.017).
-* **Carbonated RCF** raises strength in NaOH-rich mixes and lowers it in silicate-rich mixes (K × SS p < 0.001). RCF raises strength more when it is carbonated (K × RCF p = 0.024) and when SS is low (RCF × SS p = 0.026).
-* **Carbonation duration**: the 0.5, 1 and 5 h levels do not differ (p = 0.12).
-* **A/B** (0.42–0.48) has no detectable effect (every A/B term added to the final model: p ≥ 0.24).
-* **Reliability**: 7-day strength of a new mixture is predicted with R² 0.90 (RMSE 2.2 MPa, replicate scatter 2.5 MPa). 28-day strength is predicted poorly (R² 0.09, RMSE 7.7 MPa): the 28-day residual scatter (34 %) exceeds the replicate scatter (20 %).
+* **In the selected model, curing age interacts with SS only.** The strength gain f28/f7 is 2.88 (95 % CI 2.40–3.45) at SS 0 %, reaches a minimum of 1.36 near SS 54 % and is 1.53 (1.20–1.95) at SS 75 % (SS × Age p < 0.001, SS² × Age p = 0.008).
+* **Carbonated RCF** raises strength in NaOH-rich mixes and lowers it in silicate-rich mixes (K × SS p < 0.001). RCF raises strength more when it is carbonated (K × RCF p = 0.015) and when SS is low (RCF × SS p = 0.019).
+* **Carbonation duration**: the 0.5, 1 and 5 h levels do not differ (p = 0.098).
+* **A/B** (0.42–0.48) has no detectable effect (every A/B term added to the final model: p ≥ 0.20).
+* **Reliability**: 7-day strength of a new mixture is predicted with R² 0.91 (RMSE 2.1 MPa, replicate scatter 2.2 MPa). 28-day strength is predicted poorly (R² -0.06, RMSE 7.6 MPa): the 28-day residual scatter (35 %) exceeds the replicate scatter (19 %).
+
+## What changed with the corrected data
+
+The protocol was re-run unchanged on the corrected data. It selects the same model as before (same terms, UN covariance). The largest coefficient change is Age (0.443 → 0.375, 0.7 standard errors). Prediction of a left-out mixture: 7 d R² 0.90 → 0.91, 28 d R² 0.09 → −0.06 (RMSE 7.7 → 7.6 MPa). Gain f28/f7 at SS 0 %: 2.92 → 2.88; at SS 75 %: 1.58 → 1.53.
+
+| Quantity | Previous corrected data | Current corrected data |
+|---|---|---|
+| Selected terms | A D Carb AD D2 KA KD Age D.Age D2.Age | A D Carb AD D2 KA KD Age D.Age D2.Age |
+| Within-mixture covariance | UN | UN |
+| Box–Cox λ (selected model) | 0.13 | 0.14 |
+| AICc of the final model | 11.51 | 9.66 |
+| AICc of the best CS model | 16.43 | 16.05 |
+| Replicate (pure-error) SD, 7 d (MPa) | 2.5 | 2.2 |
+| Replicate (pure-error) SD, 28 d (MPa) | 4.1 | 3.9 |
+| Residual SD 7 d (ln) | 0.153 | 0.147 |
+| Residual SD 28 d (ln) | 0.327 | 0.335 |
+| 7/28-day correlation within mixture | 0.49 | 0.52 |
+| R² 7 d | 0.95 | 0.96 |
+| R² 28 d | 0.34 | 0.23 |
+| Predicted R², leave one mixture out, 7 d | 0.90 | 0.91 |
+| Predicted R², leave one mixture out, 28 d | 0.09 | -0.06 |
+| RMSE of a left-out mixture, 7 d (MPa) | 2.2 | 2.1 |
+| RMSE of a left-out mixture, 28 d (MPa) | 7.7 | 7.6 |
+| Nested CV pred. R² of the selection procedure, 7 d | 0.87 | 0.89 |
+| Nested CV pred. R² of the selection procedure, 28 d | 0.03 | -0.09 |
+| Lack of fit p, 7 d | 0.89 | 0.82 |
+| Lack of fit p, 28 d | 0.089 | 0.087 |
+| Gain f28/f7 at SS 0 % | 2.92 | 2.88 |
+| Gain f28/f7 at SS 37.5 % | 1.56 | 1.46 |
+| Gain f28/f7 at SS 75 % | 1.58 | 1.53 |
+| SS of minimum gain (%) | 55 | 54 |
+| 1 h / NC at RCF 50 %, SS 0 % | 1.55 | 1.58 |
+| 1 h / NC at RCF 10 %, SS 75 % | 0.53 | 0.53 |
+| p, carbonation levels 0.5 / 1 / 5 h equal | 0.12 | 0.098 |
+| Exact final model re-selected, residual bootstrap | 22 % | 27 % |
+| p, RCF | 0.37 | 0.36 |
+| p, SS | < 0.001 | < 0.001 |
+| p, Carb | 0.22 | 0.19 |
+| p, RCF·SS | 0.026 | 0.019 |
+| p, SS² | < 0.001 | < 0.001 |
+| p, K·RCF | 0.024 | 0.015 |
+| p, K·SS | < 0.001 | < 0.001 |
+| p, Age | < 0.001 | < 0.001 |
+| p, SS × Age | < 0.001 | < 0.001 |
+| p, SS² × Age | 0.017 | 0.008 |
+
+Full comparison, including optima and the 7 → 28-day change of each effect: `results/tables/T24_comparison_with_previous_data.csv`.
 
 ## 1 Data
 
 * Corrected data set (controlling): `data/strength_7d_28d_corrected.csv`; long format `data/strength_long.csv`.
 * 30 mixtures, 24 distinct design points; replicate batches: mixes 1/12/19, 10/14, 6/17/28, 8/23 (6 df pure error per age).
-* Pure-error SD: 2.5 MPa (7 d), 4.1 MPa (28 d); on the ln scale 0.194 and 0.201, i.e. equal once the scale is logarithmic.
-* 33 differences from the run sheet of the earlier 7-day model (`results/tables/T00_changes_vs_previous_7d_data.csv`). The largest is the 7-day strength of mix 12 (14.70 → 16.20 MPa).
+* Pure-error SD: 2.2 MPa (7 d), 3.9 MPa (28 d); on the ln scale 0.175 and 0.193, i.e. equal once the scale is logarithmic.
+* Source: `data/source/30_mixes_7_and_28_days_strength_results.pdf` (corrected results of the 30 mixes); it replaces the previous corrected sheet (kept as `data/previous_corrected_v1.csv`). Compositions are unchanged.
+* 31 differences from the previous corrected data (`results/tables/T00b_changes_vs_previous_corrected_data.csv`): the 28-day strength of 11 mixes (mixes 7, 8, 13, 17, 19, 21, 23, 24, 25, 26, 28; −5.00 to −1.01 MPa, mean −2.64 MPa), the 7-day strength of mix 12 16.20 → 14.70 MPa, 8 strengths re-rounded by 0.01 MPa and 10 28-day specimen SDs (10 larger).
+* 36 differences from the run sheet of the earlier 7-day model (`results/tables/T00_changes_vs_previous_7d_data.csv`). The 7-day strengths differ only by rounding (at most 0.01 MPa, 9 mixes).
 
 ## 2 Methods
 
@@ -30,168 +79,169 @@ A single linear mixed model describes the 7- and 28-day compressive strength of 
 
 **Selection.** Exhaustive AICc search of all 53,105 models respecting strong hierarchy, under CS and UN. Under CS the likelihood factorises into OLS fits of M and G. Under UN, because hierarchy makes the gain terms a subset of the level terms, it factorises exactly into OLS(G | X<sub>G</sub>) and OLS(M | X<sub>M</sub>, G). The overall AICc minimum is the final model. Cross-checks: backward elimination (α = 0.10, 0.05), Akaike weights, nested leave-one-mixture-out and leave-one-design-point-out cross-validation of each selection procedure, single-mixture deletion, 2,000 residual-bootstrap and 2,000 subsample (24 of 30 mixtures) re-selections.
 
-**Scale.** Box–Cox profile likelihood for both ages jointly: λ = 0.13 (95 % CI −0.11 to 0.40) for the selected model (λ = 1 rejected, LR 26.7); λ = −0.39 (95 % CI −0.75 to −0.02) for the saturated candidate model.
+**Scale.** Box–Cox profile likelihood for both ages jointly: λ = 0.14 (95 % CI −0.10 to 0.41) for the selected model (λ = 1 rejected, LR 26.5); λ = −0.35 (95 % CI −0.71 to 0.01) for the saturated candidate model.
 
-**Carbonation coding check.** Pre-set rule: replace the 4-level coding only if an alternative's best model is ≥ 2 AICc units better and predicts both ages better in cross-validation. On/off ΔAICc −1.13, log duration −0.95, numeric duration 1.42: the 4-level coding is kept.
+**Carbonation coding check.** Pre-set rule: replace the 4-level coding only if an alternative's best model is ≥ 2 AICc units better and predicts both ages better in cross-validation. On/off ΔAICc −0.83, log duration −1.44, numeric duration 0.76: the 4-level coding is kept.
 
 ## 3 Final model
 
 Coded form (g = −½ at 7 d, +½ at 28 d):
 
-    ln f = 2.9551 + 0.0598·A + 0.6029·D + 0.0650·C0.5h − 0.0931·C1h + 0.0613·C5h − 0.1085·AD − 0.5249·D² + 0.1982·K·A − 0.3360·K·D + g·(0.4435 − 0.3059·D + 0.3208·D²)
+    ln f = 2.9151 + 0.0591·A + 0.6010·D + 0.0465·C0.5h − 0.0915·C1h + 0.0705·C5h − 0.1102·AD − 0.4991·D² + 0.2057·K·A − 0.3441·K·D + g·(0.3752 − 0.3179·D + 0.3648·D²)
 
 Actual units (RCF, SS in %; K = 1 for carbonated RCF; C[·] carbonation-level indicators):
 
-    ln(f7) = 1.03971 + 0.0084169·RCF + 0.0610455·SS − 1.4469×10^−4·RCF·SS − 4.8732×10^−4·SS² + 0.103748·C[0.5 h] − 0.054418·C[1 h] + 0.100028·C[5 h] + 0.00991027·K·RCF − 0.00896104·K·SS
-    ln(f28) = 2.10988 + 0.0084169·RCF + 0.0357793·SS − 1.4469×10^−4·RCF·SS − 2.5922×10^−4·SS² + 0.103748·C[0.5 h] − 0.054418·C[1 h] + 0.100028·C[5 h] + 0.00991027·K·RCF − 0.00896104·K·SS
-    ln(f28/f7) = 1.07017 − 0.0252662·SS + 2.2811×10^−4·SS²
+    ln(f7) = 1.03206 + 0.00846427·RCF + 0.0610224·SS − 1.4687×10^−4·RCF·SS − 4.8466×10^−4·SS² + 0.0819631·C[0.5 h] − 0.0559958·C[1 h] + 0.105909·C[5 h] + 0.0102872·K·RCF − 0.00917525·K·SS
+    ln(f28) = 2.09 + 0.00846427·RCF + 0.0330868·SS − 1.4687×10^−4·RCF·SS − 2.2523×10^−4·SS² + 0.0819631·C[0.5 h] − 0.0559958·C[1 h] + 0.105909·C[5 h] + 0.0102872·K·RCF − 0.00917525·K·SS
+    ln(f28/f7) = 1.05795 − 0.0279356·SS + 2.5943×10^−4·SS²
 
-Covariance (UN): SD 0.153 (7 d), 0.327 (28 d), correlation 0.49. AICc 11.51 (best CS model 16.43).
+Covariance (UN): SD 0.147 (7 d), 0.335 (28 d), correlation 0.52. AICc 9.66 (best CS model 16.05).
 
 ### Term tests
 
 | Term | df | F | p | Residual bootstrap | Subsamples 24/30 | Evidence |
 |---|---|---|---|---|---|---|
-| RCF | 1, 20.0 | 0.83 | 0.37 | 100 % | 99 % | Retained for hierarchy |
-| SS | 1, 26.3 | 65.78 | < 0.001 | 100 % | 100 % | Robust |
-| Carbonation (4 levels) | 3, 20.0 | 1.59 | 0.22 | 98 % | 71 % | Retained for hierarchy |
-| RCF × SS | 1, 20.0 | 5.83 | 0.026 | 82 % | 47 % | Moderate |
-| SS² | 1, 21.4 | 28.66 | < 0.001 | 100 % | 100 % | Robust |
-| Carbonated × RCF | 1, 20.0 | 5.96 | 0.024 | 81 % | 41 % | Moderate |
-| Carbonated × SS | 1, 20.0 | 16.85 | < 0.001 | 97 % | 67 % | Moderate |
-| Age (28 vs 7 d) | 1, 27.0 | 24.38 | < 0.001 | – | – | Design factor |
-| SS × Age | 1, 27.0 | 18.83 | < 0.001 | 100 % | 100 % | Robust |
-| SS² × Age | 1, 27.0 | 6.44 | 0.017 | 75 % | 62 % | Moderate |
+| RCF | 1, 20.0 | 0.89 | 0.36 | 100 % | 100 % | Retained for hierarchy |
+| SS | 1, 26.6 | 67.26 | < 0.001 | 100 % | 100 % | Robust |
+| Carbonation (4 levels) | 3, 20.0 | 1.75 | 0.19 | 99 % | 75 % | Retained for hierarchy |
+| RCF × SS | 1, 20.0 | 6.57 | 0.019 | 84 % | 52 % | Moderate |
+| SS² | 1, 20.2 | 25.38 | < 0.001 | 100 % | 100 % | Robust |
+| Carbonated × RCF | 1, 20.0 | 7.02 | 0.015 | 85 % | 46 % | Moderate |
+| Carbonated × SS | 1, 20.0 | 19.32 | < 0.001 | 98 % | 71 % | Moderate |
+| Age (28 vs 7 d) | 1, 27.0 | 16.96 | < 0.001 | – | – | Design factor |
+| SS × Age | 1, 27.0 | 19.77 | < 0.001 | 100 % | 100 % | Robust |
+| SS² × Age | 1, 27.0 | 8.10 | 0.008 | 83 % | 79 % | Moderate |
 
 ### Coefficients (coded)
 
 | Term | Estimate | SE | df | 95 % CI | p | Residual bootstrap 95 % | Case bootstrap 95 % |
 |---|---|---|---|---|---|---|---|
-| Intercept | 2.9551 | 0.0878 | 26.1 | 2.775 to 3.135 | < 0.001 | 2.795 to 3.113 | 2.741 to 3.265 |
-| RCF (A) | 0.0598 | 0.0655 | 20.0 | -0.077 to 0.197 | 0.37 | -0.063 to 0.186 | -0.152 to 0.296 |
-| SS (D) | 0.6029 | 0.0743 | 26.3 | 0.450 to 0.756 | < 0.001 | 0.464 to 0.748 | 0.329 to 0.836 |
-| Carb 0.5 h | 0.0650 | 0.0988 | 20.0 | -0.141 to 0.271 | 0.52 | -0.117 to 0.262 | -0.289 to 0.299 |
-| Carb 1 h | -0.0931 | 0.0762 | 20.0 | -0.252 to 0.066 | 0.24 | -0.239 to 0.060 | -0.417 to 0.111 |
-| Carb 5 h | 0.0613 | 0.0779 | 20.0 | -0.101 to 0.224 | 0.44 | -0.091 to 0.214 | -0.305 to 0.269 |
-| RCF·SS (AD) | -0.1085 | 0.0450 | 20.0 | -0.202 to -0.015 | 0.026 | -0.193 to -0.019 | -0.246 to 0.070 |
-| SS² (D²) | -0.5249 | 0.0981 | 21.4 | -0.729 to -0.321 | < 0.001 | -0.692 to -0.332 | -0.817 to -0.324 |
-| K·RCF (KA) | 0.1982 | 0.0812 | 20.0 | 0.029 to 0.368 | 0.024 | 0.040 to 0.352 | -0.117 to 0.440 |
-| K·SS (KD) | -0.3360 | 0.0819 | 20.0 | -0.507 to -0.165 | < 0.001 | -0.492 to -0.175 | -0.627 to -0.033 |
-| Age | 0.4435 | 0.0898 | 27.0 | 0.259 to 0.628 | < 0.001 | 0.271 to 0.622 | 0.274 to 0.617 |
-| SS × Age | -0.3059 | 0.0705 | 27.0 | -0.451 to -0.161 | < 0.001 | -0.445 to -0.163 | -0.431 to -0.195 |
-| SS² × Age | 0.3208 | 0.1264 | 27.0 | 0.061 to 0.580 | 0.017 | 0.079 to 0.569 | 0.078 to 0.547 |
+| Intercept | 2.9151 | 0.0870 | 26.0 | 2.736 to 3.094 | < 0.001 | 2.754 to 3.074 | 2.709 to 3.249 |
+| RCF (A) | 0.0591 | 0.0627 | 20.0 | -0.072 to 0.190 | 0.36 | -0.055 to 0.182 | -0.149 to 0.293 |
+| SS (D) | 0.6010 | 0.0733 | 26.6 | 0.451 to 0.752 | < 0.001 | 0.462 to 0.746 | 0.309 to 0.826 |
+| Carb 0.5 h | 0.0465 | 0.0944 | 20.0 | -0.150 to 0.243 | 0.63 | -0.130 to 0.237 | -0.301 to 0.270 |
+| Carb 1 h | -0.0915 | 0.0728 | 20.0 | -0.243 to 0.060 | 0.22 | -0.231 to 0.061 | -0.444 to 0.098 |
+| Carb 5 h | 0.0705 | 0.0745 | 20.0 | -0.085 to 0.226 | 0.36 | -0.077 to 0.217 | -0.305 to 0.262 |
+| RCF·SS (AD) | -0.1102 | 0.0430 | 20.0 | -0.200 to -0.020 | 0.019 | -0.193 to -0.023 | -0.242 to 0.088 |
+| SS² (D²) | -0.4991 | 0.0991 | 20.2 | -0.706 to -0.293 | < 0.001 | -0.672 to -0.304 | -0.808 to -0.291 |
+| K·RCF (KA) | 0.2057 | 0.0776 | 20.0 | 0.044 to 0.368 | 0.015 | 0.053 to 0.355 | -0.106 to 0.471 |
+| K·SS (KD) | -0.3441 | 0.0783 | 20.0 | -0.507 to -0.181 | < 0.001 | -0.498 to -0.186 | -0.637 to -0.044 |
+| Age | 0.3752 | 0.0911 | 27.0 | 0.188 to 0.562 | < 0.001 | 0.196 to 0.554 | 0.210 to 0.550 |
+| SS × Age | -0.3179 | 0.0715 | 27.0 | -0.465 to -0.171 | < 0.001 | -0.452 to -0.175 | -0.443 to -0.209 |
+| SS² × Age | 0.3648 | 0.1282 | 27.0 | 0.102 to 0.628 | 0.008 | 0.115 to 0.613 | 0.105 to 0.587 |
 
 ### Fit statistics
 
 | | 7 d | 28 d |
 |---|---|---|
-| R² (ln) | 0.95 | 0.34 |
-| Adjusted R² | 0.93 | 0.25 |
-| Predicted R², leave one mixture out | 0.90 | 0.09 |
-| Predicted R², leave one design point out | 0.92 | -0.01 |
-| RMSE fitted / predicted (MPa) | 1.6 / 2.2 | 6.7 / 7.7 |
-| Residual scatter (CV) | 15 % | 34 % |
-| Adequate precision | 20.5 | 8.9 |
-| Lack of fit (per age) | p = 0.89 | p = 0.089 |
+| R² (ln) | 0.96 | 0.23 |
+| Adjusted R² | 0.94 | 0.13 |
+| Predicted R², leave one mixture out | 0.91 | -0.06 |
+| Predicted R², leave one design point out | 0.92 | -0.20 |
+| RMSE fitted / predicted (MPa) | 1.5 / 2.1 | 6.6 / 7.6 |
+| Residual scatter (CV) | 15 % | 35 % |
+| Adequate precision | 21.5 | 8.7 |
+| Lack of fit (per age) | p = 0.82 | p = 0.087 |
 
-Joint lack of fit (exact, against replicate batches): gain p = 0.35; level given gain p = 0.65.
+Joint lack of fit (exact, against replicate batches): gain p = 0.24; level given gain p = 0.63.
 
 ## 4 How curing age changes the response
 
-* Gain ratio f28/f7: SS 0 % 2.92 (2.44–3.49); SS 37.5 % 1.56 (1.30–1.87); SS 75 % 1.58 (1.24–2.01); minimum 1.45 at SS 55 % (95 % CI of location 38–73 %). Gain at SS 0 % / gain at SS 75 % = 1.84 (1.38–2.46; p < 0.001). The rise above the minimum is not significant (p = 0.44).
-* No other age interaction improves the model (added-term p ≥ 0.17). In the age-specific refit the interaction effects keep their sign but are smaller and less precise at 28 d; the changes are not significant (RCF × SS p = 0.26, K × RCF p = 0.42, K × SS p = 0.39). The 5 h level shows a smaller gain than NC (×0.77, 0.58–1.02; p = 0.069), which the selection does not retain.
-* SS at maximum strength: NC, RCF 30 % — SS 58 % at 7 d, SS 61 % at 28 d; carbonated (1 h), RCF 50 % — SS 46 % at 7 d, SS 38 % at 28 d.
+* Gain ratio f28/f7: SS 0 % 2.88 (2.40–3.45); SS 37.5 % 1.46 (1.21–1.75); SS 75 % 1.53 (1.20–1.95); minimum 1.36 at SS 54 % (95 % CI of location 39–69 %). Gain at SS 0 % / gain at SS 75 % = 1.89 (1.41–2.53; p < 0.001). The rise above the minimum is not significant (p = 0.34).
+* No other age interaction is selected (smallest added-term p = 0.077, and every addition raises AICc). In the age-specific refit the interaction effects keep their sign but are smaller and less precise at 28 d; the changes are not significant (RCF × SS p = 0.25, K × RCF p = 0.33, K × SS p = 0.21). The 5 h level shows a smaller gain than NC (×0.75, 0.57–0.98; p = 0.038), which the selection does not retain.
+* SS at maximum strength: NC, RCF 30 % — SS 58 % at 7 d, SS 64 % at 28 d; carbonated (1 h), RCF 50 % — SS 46 % at 7 d, SS 37 % at 28 d.
 
 | Term | 7 d [95 % CI] | 28 d [95 % CI] | Change | p (change) |
 |---|---|---|---|---|
-| RCF | 0.060 [−0.077, 0.197] | 0.070 [−0.210, 0.349] | 0.010 [−0.230, 0.250] | 0.93 |
-| SS | 0.754 [0.619, 0.890] | 0.358 [0.082, 0.635] | −0.396 [−0.633, −0.159] | 0.002 |
-| Carb 0.5 h | 0.065 [−0.141, 0.271] | 0.046 [−0.375, 0.467] | −0.019 [−0.381, 0.343] | 0.91 |
-| Carb 1 h | −0.094 [−0.253, 0.065] | −0.163 [−0.488, 0.162] | −0.069 [−0.348, 0.210] | 0.61 |
-| Carb 5 h | 0.057 [−0.105, 0.220] | −0.205 [−0.537, 0.127] | −0.262 [−0.548, 0.023] | 0.069 |
-| RCF·SS | −0.107 [−0.201, −0.013] | −0.015 [−0.207, 0.177] | 0.092 [−0.073, 0.257] | 0.26 |
-| SS² | −0.684 [−0.837, −0.532] | −0.307 [−0.619, 0.005] | 0.378 [0.109, 0.646] | 0.008 |
-| K·RCF | 0.196 [0.027, 0.366] | 0.079 [−0.267, 0.426] | −0.117 [−0.414, 0.180] | 0.42 |
-| K·SS | −0.334 [−0.505, −0.163] | −0.206 [−0.556, 0.143] | 0.128 [−0.172, 0.427] | 0.39 |
+| RCF | 0.060 [−0.071, 0.191] | 0.083 [−0.188, 0.355] | 0.023 [−0.204, 0.250] | 0.83 |
+| SS | 0.754 [0.625, 0.884] | 0.319 [0.051, 0.587] | −0.436 [−0.660, −0.211] | < 0.001 |
+| Carb 0.5 h | 0.048 [−0.149, 0.246] | 0.089 [−0.320, 0.497] | 0.040 [−0.302, 0.382] | 0.81 |
+| Carb 1 h | −0.094 [−0.246, 0.059] | −0.145 [−0.460, 0.170] | −0.052 [−0.315, 0.212] | 0.69 |
+| Carb 5 h | 0.057 [−0.099, 0.213] | −0.231 [−0.553, 0.091] | −0.288 [−0.557, −0.018] | 0.038 |
+| RCF·SS | −0.106 [−0.196, −0.016] | −0.018 [−0.204, 0.168] | 0.088 [−0.068, 0.243] | 0.25 |
+| SS² | −0.678 [−0.824, −0.531] | −0.230 [−0.533, 0.073] | 0.448 [0.194, 0.701] | 0.001 |
+| K·RCF | 0.199 [0.037, 0.362] | 0.065 [−0.271, 0.401] | −0.134 [−0.415, 0.147] | 0.33 |
+| K·SS | −0.336 [−0.500, −0.172] | −0.159 [−0.498, 0.179] | 0.177 [−0.107, 0.460] | 0.21 |
 
 ## 5 Mixture effects (common to both ages on the ln scale)
 
-* Carbonated (1 h) / NC at RCF 50 %, SS 0 %: ×1.55 (95 % CI 1.18–2.05; p = 0.003); at RCF 30 %, SS 0 %: ×1.27 (95 % CI 1.01–1.61; p = 0.040); at RCF 10 %, SS 75 %: ×0.53 (95 % CI 0.40–0.72; p < 0.001). Crossover SS (ratio = 1) for 1 h: RCF 10 % 5 %, 30 % 27 %, 50 % 49 %.
-* RCF 50 % / 10 %: carbonated, SS 0 % ×2.08 (95 % CI 1.64–2.64; p < 0.001); carbonated, SS 75 % ×1.35 (95 % CI 0.99–1.84; p = 0.057); NC, SS 0 % ×1.40 (95 % CI 1.01–1.95; p = 0.047); NC, SS 75 % ×0.91 (95 % CI 0.65–1.26; p = 0.55).
-* Carbonation levels 0.5 / 1 / 5 h: not different (p = 0.12).
-* A/B: no effect detected (A/B p = 0.68; (A/B)² p = 0.29; A/B × Age p = 0.31).
+* Carbonated (1 h) / NC at RCF 50 %, SS 0 %: ×1.58 (95 % CI 1.22–2.06; p = 0.002); at RCF 30 %, SS 0 %: ×1.29 (95 % CI 1.03–1.60; p = 0.027); at RCF 10 %, SS 75 %: ×0.53 (95 % CI 0.40–0.70; p < 0.001). Crossover SS (ratio = 1) for 1 h: RCF 10 % 5 %, 30 % 28 %, 50 % 50 %.
+* RCF 50 % / 10 %: carbonated, SS 0 % ×2.12 (95 % CI 1.69–2.65; p < 0.001); carbonated, SS 75 % ×1.36 (95 % CI 1.01–1.83; p = 0.040); NC, SS 0 % ×1.40 (95 % CI 1.02–1.93; p = 0.037); NC, SS 75 % ×0.90 (95 % CI 0.66–1.24; p = 0.51).
+* Carbonation levels 0.5 / 1 / 5 h: not different (p = 0.098).
+* A/B: no effect detected (A/B p = 0.74; (A/B)² p = 0.26; A/B × Age p = 0.29).
 
 ## 6 Optimum
 
 | Age | Carbonation | Maximum at | Median (MPa) | 95 % CI | 95 % PI | Within 5 % |
 |---|---|---|---|---|---|---|
-| 7 d | NC | RCF 10 %, SS 61.2 % | 19.0 | 15.4–23.6 | 13.0–28.0 | RCF 10–50, SS 45–71 |
-| 7 d | 0.5 h | RCF 50 %, SS 46.0 % | 22.0 | 17.4–27.8 | 14.8–32.7 | RCF 46–50, SS 36–56 |
-| 7 d | 1 h | RCF 50 %, SS 46.0 % | 18.8 | 16.1–21.9 | 13.2–26.8 | RCF 46–50, SS 36–56 |
-| 7 d | 5 h | RCF 50 %, SS 46.0 % | 21.9 | 18.2–26.4 | 15.2–31.7 | RCF 46–50, SS 36–56 |
-| 28 d | NC | RCF 10 %, SS 66.2 % | 28.0 | 21.3–36.7 | 13.6–57.3 | RCF 10–50, SS 43–75 |
-| 28 d | 0.5 h | RCF 50 %, SS 37.8 % | 33.1 | 24.8–44.1 | 16.1–68.3 | RCF 46–50, SS 24–52 |
-| 28 d | 1 h | RCF 50 %, SS 37.8 % | 28.3 | 22.2–35.9 | 13.9–57.4 | RCF 46–50, SS 24–52 |
-| 28 d | 5 h | RCF 50 %, SS 37.8 % | 33.0 | 25.5–42.7 | 16.2–67.3 | RCF 46–50, SS 24–52 |
+| 7 d | NC | RCF 10 %, SS 61.5 % | 19.0 | 15.5–23.4 | 13.2–27.5 | RCF 10–50, SS 46–72 |
+| 7 d | 0.5 h | RCF 50 %, SS 46.0 % | 21.6 | 17.3–27.1 | 14.8–31.6 | RCF 46–50, SS 36–56 |
+| 7 d | 1 h | RCF 50 %, SS 46.0 % | 18.8 | 16.2–21.8 | 13.4–26.5 | RCF 46–50, SS 36–56 |
+| 7 d | 5 h | RCF 50 %, SS 46.0 % | 22.1 | 18.5–26.5 | 15.5–31.5 | RCF 46–50, SS 36–56 |
+| 28 d | NC | RCF 10 %, SS 70.2 % | 26.7 | 19.9–35.8 | 12.7–56.1 | RCF 10–50, SS 49–75 |
+| 28 d | 0.5 h | RCF 50 %, SS 36.8 % | 30.4 | 22.8–40.4 | 14.5–63.6 | RCF 46–50, SS 22–52 |
+| 28 d | 1 h | RCF 50 %, SS 36.8 % | 26.5 | 20.8–33.8 | 12.8–54.8 | RCF 46–50, SS 22–52 |
+| 28 d | 5 h | RCF 50 %, SS 36.8 % | 31.1 | 24.0–40.3 | 15.0–64.6 | RCF 46–50, SS 22–52 |
 
-Best carbonated vs uncarbonated optimum: 7 d ×1.16 (95 % CI 0.84–1.60; p = 0.36); 28 d ×1.18 (95 % CI 0.81–1.72; p = 0.37). No optimum requires extrapolation.
+Best carbonated vs uncarbonated optimum: 7 d ×1.16 (95 % CI 0.89–1.52; p = 0.25); 28 d ×1.17 (95 % CI 0.79–1.72; p = 0.43). No optimum requires extrapolation.
 
 ## 7 Validation
 
-* Whitened residuals: Shapiro–Wilk p = 0.95; Breusch–Pagan (fitted, age) p = 0.64, (factors) p = 0.78; mix-order trend ρ = 0.01 (p = 0.94).
-* Largest deleted studentized residual 3.05 (mix 7, 28 d; Bonferroni p = 0.42). Largest Cook's D 0.28 (mix 12). The same model is selected with either mixture removed; with any single mixture removed, 28 of 30 re-selections give the same model.
+* Whitened residuals: Shapiro–Wilk p = 0.99; Breusch–Pagan (fitted, age) p = 0.62, (factors) p = 0.90; mix-order trend ρ = -0.00 (p = 0.98).
+* Largest deleted studentized residual 3.02 (mix 7, 28 d; Bonferroni p = 0.44). Largest Cook's D 0.14 (mix 4). Excluding either mixture leaves the selected model unchanged. With any single mixture removed, 29 of 30 re-selections give the same model.
 * Nested cross-validation (selection repeated in every fold), leave one mixture out:
 
 | Procedure | Pred R² 7 d | Pred R² 28 d | RMSE 7 d | RMSE 28 d | Distinct models / folds |
 |---|---|---|---|---|---|
-| AICc overall (primary) | 0.87 | 0.03 | 2.8 | 8.1 | 3 / 30 |
-| AICc, UN only | 0.90 | 0.09 | 2.2 | 7.7 | 1 / 30 |
-| AICc, CS only | 0.71 | 0.14 | 3.2 | 7.4 | 10 / 30 |
-| Backward a=0.10, UN | 0.73 | -0.74 | 3.4 | 10.1 | 21 / 30 |
-| Backward a=0.05, UN | 0.75 | -0.68 | 3.3 | 9.2 | 9 / 30 |
-| Backward a=0.10, CS | 0.77 | -0.18 | 3.3 | 8.4 | 16 / 30 |
-| AICc overall, on/off carbonation | 0.88 | 0.04 | 2.3 | 7.7 | 4 / 30 |
-| AICc overall, log-duration carbonation | 0.76 | -0.06 | 3.0 | 7.3 | 11 / 30 |
-| AICc overall, numeric-duration carbonation | 0.74 | -0.04 | 3.0 | 7.0 | 10 / 30 |
-| Separate per-age OLS models, AICc (ignores pairing) | 0.86 | 0.12 | 2.3 | 7.5 | – |
-| Full candidate model (no selection) | 0.87 | -0.23 | 2.5 | 9.1 | – |
-| Final model (fixed terms) | 0.90 | 0.09 | 2.2 | 7.7 | – |
+| AICc overall (primary) | 0.89 | -0.09 | 2.2 | 7.6 | 2 / 30 |
+| AICc, UN only | 0.91 | -0.06 | 2.1 | 7.6 | 1 / 30 |
+| AICc, CS only | 0.76 | 0.14 | 3.1 | 6.7 | 7 / 30 |
+| Backward a=0.10, UN | 0.78 | -0.70 | 3.2 | 9.2 | 15 / 30 |
+| Backward a=0.05, UN | 0.75 | -0.49 | 3.4 | 9.3 | 14 / 30 |
+| Backward a=0.10, CS | 0.78 | -0.12 | 3.0 | 7.6 | 13 / 30 |
+| AICc overall, on/off carbonation | 0.89 | -0.04 | 2.2 | 7.4 | 3 / 30 |
+| AICc overall, log-duration carbonation | 0.78 | -0.21 | 2.8 | 6.9 | 8 / 30 |
+| AICc overall, numeric-duration carbonation | 0.77 | -0.20 | 2.9 | 6.7 | 8 / 30 |
+| Separate per-age OLS models, AICc (ignores pairing) | 0.89 | -0.13 | 2.1 | 7.2 | – |
+| Full candidate model (no selection) | 0.87 | -0.38 | 2.4 | 9.0 | – |
+| Final model (fixed terms) | 0.91 | -0.06 | 2.1 | 7.6 | – |
 
 ## 8 Robustness
 
 | Analysis | Gain SS 0 | Gain SS 75 | 1 h/NC RCF 50 SS 0 (28 d) | 1 h/NC RCF 10 SS 75 (28 d) | RCF 50/10 (28 d) | Pred R² 7 d | Pred R² 28 d |
 |---|---|---|---|---|---|---|---|
-| Primary: final model, ln scale, UN, 4-level carbonation | 2.92 | 1.58 | 1.55 | 0.53 | 2.08 | 0.90 | 0.09 |
-| Same terms, CS covariance (random intercept, equal variances) | 2.92 | 1.58 | 1.32 | 0.58 | 1.69 | 0.86 | 0.08 |
-| AICc-best model under CS: A C D Carb A2 C2 D2 KD Age D.Age D2.Age | 2.92 | 1.58 | 1.11 | 0.61 | 1.43 | 0.82 | 0.46 |
-| Same terms, carbonation coded on/off (carbonated yes/no) | 2.92 | 1.58 | 1.64 | 0.59 | 1.95 | 0.90 | 0.15 |
-| Same terms, carbonation coded log2(1+h) duration | 2.92 | 1.58 | 1.26 | 0.81 | 1.78 | 0.88 | 0.12 |
-| Same terms, carbonation coded numeric duration | 2.92 | 1.58 | 1.11 | 0.91 | 1.69 | 0.87 | 0.13 |
-| AICc-best model with log-duration coding: A D Carb AD A2 D2 KD Age D.Age Carb.Age D2.Age | 3.34 | 1.76 | 1.04 | 0.77 | 1.72 | 0.87 | 0.36 |
-| Same terms, raw MPa scale | 4.87 | 1.47 | 1.26 | 0.70 | 1.32 | 0.79 | 0.17 |
-| Same terms, Box-Cox lambda = -0.5 | 2.58 | 1.71 | 1.76 | 0.45 | 2.76 | 0.87 | -0.40 |
-| Same terms, Box-Cox lambda = +0.5 | 3.52 | 1.51 | 1.36 | 0.63 | 1.56 | 0.90 | 0.28 |
-| Selection repeated on lambda = -0.5 scale (CS): A C D Carb AC AD A2 C2 D2 KD Age A.Age D.Age AD.Age D2.Age | 2.62 | 1.73 | 1.16 | 0.60 | 1.37 | 0.88 | 0.36 |
-| Same terms, single-specimen means down-weighted (n = 1 vs 3) | 2.93 | 1.58 | 1.55 | 0.53 | 2.08 | – | – |
-| Same terms, Huber robust M-estimation (whitened) | 2.95 | 1.60 | 1.55 | 0.53 | 2.08 | – | – |
-| Same terms, mix 7 excluded (largest |deleted t|); re-selection gives the same model | 2.84 | 1.62 | 1.55 | 0.56 | 2.03 | 0.90 | 0.23 |
-| Same terms, mix 12 excluded (largest Cook's D); re-selection gives the same model | 2.91 | 1.57 | 1.67 | 0.51 | 2.26 | 0.91 | -0.02 |
-| Final terms, every term interacting with age (age-specific coefficients) | 3.59 | 1.63 | 1.13 | 0.64 | 1.39 | 0.91 | -0.12 |
-| Backward elimination (alpha 0.10, UN): A C D Carb AD A2 C2 D2 KA KD Age A.Age C.Age D.Age Carb.Age A2.Age C2.Age D2.Age | 3.48 | 1.84 | 1.22 | 0.47 | 1.69 | 0.89 | 0.34 |
-| Separate per-age OLS models (AICc): 7 d = A D Carb AD D2 KA KD; 28 d = A C D A2 | 5.10 | 1.86 | 1.00 | 1.00 | 1.16 | 0.91 | 0.38 |
+| Primary: final model, ln scale, UN, 4-level carbonation | 2.88 | 1.53 | 1.58 | 0.53 | 2.12 | 0.91 | -0.06 |
+| Same terms, CS covariance (random intercept, equal variances) | 2.88 | 1.53 | 1.30 | 0.61 | 1.70 | 0.86 | 0.01 |
+| AICc-best model under CS: A C D Carb A2 C2 D2 KD Age D.Age D2.Age | 2.88 | 1.53 | 1.10 | 0.63 | 1.45 | 0.83 | 0.39 |
+| Same terms, carbonation coded on/off (carbonated yes/no) | 2.88 | 1.53 | 1.65 | 0.59 | 1.98 | 0.91 | 0.04 |
+| Same terms, carbonation coded log2(1+h) duration | 2.88 | 1.53 | 1.26 | 0.81 | 1.80 | 0.88 | 0.01 |
+| Same terms, carbonation coded numeric duration | 2.88 | 1.53 | 1.11 | 0.92 | 1.70 | 0.88 | 0.04 |
+| AICc-best model with log-duration coding: A D Carb AD A2 D2 KA KD Age D.Age Carb.Age D2.Age | 3.37 | 1.73 | 1.09 | 0.72 | 1.73 | 0.86 | 0.06 |
+| Same terms, raw MPa scale | 4.70 | 1.42 | 1.26 | 0.69 | 1.33 | 0.80 | 0.08 |
+| Same terms, Box-Cox lambda = -0.5 | 2.56 | 1.64 | 1.77 | 0.45 | 2.81 | 0.87 | -0.56 |
+| Same terms, Box-Cox lambda = +0.5 | 3.46 | 1.46 | 1.37 | 0.62 | 1.58 | 0.91 | 0.18 |
+| Selection repeated on lambda = -0.5 scale (CS): A C D Carb AD A2 C2 D2 KD Age A.Age D.Age AD.Age D2.Age | 2.58 | 1.65 | 1.15 | 0.60 | 1.39 | 0.85 | 0.25 |
+| Same terms, single-specimen means down-weighted (n = 1 vs 3) | 2.91 | 1.52 | 1.58 | 0.53 | 2.11 | – | – |
+| Same terms, each mean weighted by its own specimen scatter (CV²/n added to the variance) | 2.89 | 1.53 | 1.66 | 0.50 | 2.27 | 0.91 | -0.18 |
+| Same terms, Huber robust M-estimation (whitened) | 2.91 | 1.54 | 1.57 | 0.53 | 2.10 | – | – |
+| Same terms, mix 4 excluded (largest Cook's D); re-selection gives the same model | 2.87 | 1.39 | 1.57 | 0.48 | 2.09 | 0.90 | 0.07 |
+| Same terms, mix 7 excluded (largest |deleted t|); re-selection gives the same model | 2.80 | 1.56 | 1.57 | 0.56 | 2.06 | 0.91 | 0.10 |
+| Final terms, every term interacting with age (age-specific coefficients) | 3.67 | 1.53 | 1.08 | 0.69 | 1.40 | 0.91 | -0.17 |
+| Backward elimination (alpha 0.10, UN): A C D Carb AD C2 D2 KA KD Age C.Age D.Age Carb.Age C2.Age D2.Age | 2.85 | 1.49 | 1.28 | 0.45 | 2.07 | 0.91 | 0.20 |
+| Separate per-age OLS models (AICc): 7 d = A D Carb AD D2 KA KD; 28 d = A C D Carb A2 C2 | 4.42 | 1.56 | 0.80 | 0.80 | 1.35 | 0.91 | 0.43 |
 
-Residual bootstrap re-selection: exact model 22 %, same terms 22 %, SS the only age-dependent variable 86 %. Subsamples (24 of 30): exact model 12 %, SS the only age-dependent variable 91 %.
+Residual bootstrap re-selection: exact model 27 %, same terms 27 %, SS the only age-dependent variable 86 %. Subsamples (24 of 30): exact model 20 %, SS the only age-dependent variable 89 %.
 
 ## 9 Interpretation and limits
 
 1. The 7-day strength is described to within replicate precision by SS (quadratic), RCF, carbonation, and the interactions K × SS, K × RCF and RCF × SS.
-2. From 7 to 28 days the strength of every mixture increases. The size of the increase is governed by SS: NaOH-only mixes roughly triple, silicate-rich mixes gain about half as much. No detectable part of the gain depends on RCF, A/B or carbonation.
-3. Because the gain does not depend on them, the model carries the 7-day RCF and carbonation effects to 28 days as the same percentage effects (larger in MPa, because 28-day strength is higher). The 28-day data agree with this in sign, but they are too scattered to confirm the size of these effects at 28 days or to rule out moderate weakening. This is the main limitation.
-4. 28-day strength of a new mixture is uncertain (95 % prediction interval about ×/÷ 2.0, against ×/÷ 1.4 at 7 days) because 28-day results scatter more between mixtures than replicate batches do. Unrecorded differences between batches during curing, or data issues (for example mix 7 at 28 d), are possible reasons that the data cannot settle.
-5. Suggested confirmation: triplicate batches tested at both ages at the predicted optima (carbonated RCF 50 %, SS ≈ 38–46 %; uncarbonated SS ≈ 61–66 %), repeats of mix 7 and mix 25 (the two largest 28-day residuals), and a 5 h vs NC comparison at equal composition to test the smaller gain seen after long carbonation.
+2. From 7 to 28 days the model predicts an increase for every mixture; observed, 28 of 30 mixes gain strength and mixes 17 and 28 do not (mix 17, 5 h, RCF 36.6 %, SS 49.88 %: 16.90 → 16.88 MPa; mix 28, 5 h, RCF 36.6 %, SS 49.83 %: 20.82 → 17.75 MPa). The size of the increase is governed by SS: NaOH-only mixes roughly triple, silicate-rich mixes gain about half as much. No part of the gain depending on RCF or A/B is detected. A smaller gain after 5 h carbonation is possible (5 h vs NC ×0.75, p = 0.038; joint carbonation × age p = 0.081) but is not selected.
+3. Because the gain does not depend on them, the model carries the 7-day RCF and carbonation effects to 28 days as the same percentage effects (larger in MPa, because 28-day strength is higher). The 28-day data agree with this in sign for RCF × SS, K × RCF and K × SS (the 5 h level is the exception: at 28 d it lies below NC), but they are too scattered to confirm the size of these effects at 28 days or to rule out moderate weakening. This is the main limitation.
+4. 28-day strength of a new mixture is uncertain (95 % prediction interval about ×/÷ 2.1, against ×/÷ 1.4 at 7 days) because 28-day results scatter more between mixtures than replicate batches do. Unrecorded differences between batches during curing, or data issues (for example mix 7 at 28 d), are possible reasons that the data cannot settle. The 28-day residuals are not related to the specimen scatter of each mean (Spearman ρ = -0.10, p = 0.63), so weighting the means by their SDs does not help (robustness table).
+5. Suggested confirmation: triplicate batches tested at both ages at the predicted optima (carbonated RCF 50 %, SS ≈ 37–46 %; uncarbonated SS ≈ 62–70 %), repeats of mix 7 and mix 4 (the two largest 28-day residuals), and a 5 h vs NC comparison at equal composition to test the smaller gain seen after long carbonation.
 
 ## 10 Files
 
-* `analysis/` — `prepare_data.py`, `run_analysis.py`, `make_figures.py`, `build_report.py`; library modules `design.py`, `lmm.py`, `selection.py`, `model_tools.py`, `report_text.py`.
-* `results/model_results.json` — every result; `results/tables/T00–T23` — CSV tables; `results/figures/F01–F11` — PNG (300 dpi) and vector PDF.
+* `analysis/` — `prepare_data.py`, `run_analysis.py`, `compare_previous.py`, `make_figures.py`, `build_report.py`; library modules `design.py`, `lmm.py`, `selection.py`, `model_tools.py`, `report_text.py`.
+* `results/model_results.json` — every result; `results/tables/T00–T24` — CSV tables; `results/figures/F01–F11` — PNG (300 dpi) and vector PDF.
 * `report/index.html` — interactive report; `report/Model_Summary.pdf` — printable summary; this file.

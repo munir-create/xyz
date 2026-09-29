@@ -28,7 +28,7 @@ REP = os.path.join(dz.ROOT, "report", "separate")
 os.makedirs(os.path.join(REP, "figures"), exist_ok=True)
 E = html.escape
 AGES = ("7", "28")
-EXPECTED = {"7": {"A", "D", "Carb", "AD", "D2", "KA", "KD"}, "28": {"A", "C", "D", "A2"}}
+EXPECTED = {"7": {"A", "D", "Carb", "AD", "D2", "KA", "KD"}, "28": {"A", "C", "D", "Carb", "A2", "C2"}}
 
 TXT = {"A": "RCF", "C": "A/B", "D": "SS", "Carb": "Carbonation (4 levels)", "AC": "RCF × A/B", "AD": "RCF × SS", "CD": "A/B × SS",
        "A2": "RCF²", "C2": "(A/B)²", "D2": "SS²", "KA": "Carbonated × RCF", "KC": "Carbonated × A/B", "KD": "Carbonated × SS"}
@@ -93,7 +93,7 @@ def age_numbers(A):
               "lof": pe(fit["lof"]["p"]), "pe": f3(A["pure_error"]["sd_ln"]), "peM": f1(A["pure_error"]["sd_MPa"]),
               "rm_fit": f1(A["validation"]["fit"]["rmse_MPa"]), "rm_loo": f1(A["validation"]["loo"]["rmse_MPa"]),
               "pr_lodpo": f2(A["validation"]["lodpo"]["predR2"]), "aicc": f2(fit["AICc"]),
-              "bc": f"λ = {A['boxcox_final']['lambda']:.2f} (95 % CI {mn(f2(A['boxcox_final']['ci'][0]))} to {A['boxcox_final']['ci'][1]:.2f})",
+              "bc": f"λ = {mn(f2(A['boxcox_final']['lambda']))} (95 % CI {mn(f2(A['boxcox_final']['ci'][0]))} to {A['boxcox_final']['ci'][1]:.2f})",
               "bc_full": f"λ = {mn(f2(A['boxcox_full']['lambda']))} (95 % CI {mn(f2(A['boxcox_full']['ci'][0]))} to {A['boxcox_full']['ci'][1]:.2f})",
               "del_same": int(pd.DataFrame(A["deletion"]).same.sum()),
               "resid_exact": pct(A["bootstrap"]["resid"]["exact_final"]), "sub_exact": pct(A["bootstrap"]["subsample"]["exact_final"])})
@@ -242,7 +242,7 @@ def trend_tables(R):
             o = {x["carbonation"]: x for x in R[a]["optimum"]}[carb]
             ab = f", A/B {o['AB']:.2f}" if "C" in R[a]["final_terms"] else ""
             r[f"w{a}"] = f"RCF {o['RCF']:.0f}, SS {o['SS']:.0f}{ab}"
-            r[f"f{a}"] = f"{o['median']:.1f} [{o['ci'][0]:.1f}–{o['ci'][1]:.1f}]"
+            r[f"f{a}"] = f"{o['median']:.1f} [{o['ci'][0]:.1f}–{o['ci'][1]:.1f}]" + (" †" if o["extrapolation"] else "")
             r[f"pi{a}"] = f"{o['pi'][0]:.1f}–{o['pi'][1]:.1f}"
         rows.append(r)
     T["opt"] = pd.DataFrame(rows)
@@ -307,7 +307,8 @@ def detail_section(a, A, K):
     top_models_r = ", ".join(f"{', '.join(TXT.get(t, t) for t in m.split())} ({c})" for m, c in A["bootstrap"]["resid"]["top_models"][:3])
     top_models_s = ", ".join(f"{', '.join(TXT.get(t, t) for t in m.split())} ({c})" for m, c in A["bootstrap"]["subsample"]["top_models"][:3])
     dur = A.get("duration_equal_test")
-    dur_txt = f" The three carbonated levels do not differ in level (F({dur['df1']}, {dur['df2']}) = {dur['F']:.2f}, {pe(dur['p'])})." if dur else ""
+    dur_txt = (f" The three carbonated levels {'do not differ' if dur['p'] >= 0.05 else 'differ'} in level (F({dur['df1']}, {dur['df2']}) = {dur['F']:.2f}, {pe(dur['p'])})."
+               if dur else "")
     return f"""
 <section id="m{a}">
   <h2>{a}-day model in detail</h2>
@@ -334,6 +335,54 @@ def detail_section(a, A, K):
 </section>"""
 
 
+def note28(R):
+    """Card note for the 28-day model, from its results."""
+    A = R["28"]
+    ev = A["evidence"]
+    robust = [TXT[t] for t in A["final_terms"] if ev[t] == "Robust"]
+    dele = pd.DataFrame(A["deletion"])
+    n_diff = int((~dele.same).sum())
+    nc = pd.DataFrame(A["nested_cv"])
+    ncm = nc[nc.cv == "leave-one-mixture-out"].set_index("procedure")
+    s = (f"{' and '.join(robust) if robust else 'No term'} {'is the only robust term' if len(robust) == 1 else 'are robust'}. "
+         f"The selection is unstable: removing a single mixture changes the selected terms in {n_diff} of 30 cases, subsamples of 24 mixtures "
+         f"re-select the model in {pct(A['bootstrap']['subsample']['exact_final'])}, and nested cross-validation of the AICc procedure gives "
+         f"predicted R² {mn(f2(ncm.loc['AICc (primary)', 'predR2']))} against {f2(ncm.loc['Final model (fixed terms)', 'predR2'])} for the fixed terms. ")
+    if "Carb" in A["final_terms"]:
+        co = pd.DataFrame(A["coef"]).set_index("column")
+        lv = ", ".join(f"{c[5:-1]} ×{np.exp(co.loc[c, 'coef']):.2f}" for c in co.index if c.startswith("Carb["))
+        dur = A.get("duration_equal_test")
+        s += (f"Carbonation enters as a level shift only (vs NC: {lv}"
+              + (f"; carbonated levels differ, {pe(dur['p'])}" if dur else "") + "); the 0.5 h level rests on two compositions (mixes 1/12/19 and 10/14). ")
+    else:
+        ad = pd.DataFrame(A["added_terms"])
+        s += f"No carbonation term is detected (best added-term {pe(float(ad[ad.term.isin(['Carb', 'KA', 'KD', 'KC'])].p.min()))}). "
+    return s + "Predictions for a new mixture are much less precise than at 7 days."
+
+
+def opt_note(R):
+    """Note under the optimum table: extrapolation and range edges, from the results."""
+    parts = []
+    ext = [f"{a} d, {o['carbonation']}" for a in AGES for o in R[a]["optimum"] if o["extrapolation"]]
+    if ext:
+        parts.append("† Outside the region the data support (leverage above the largest design leverage): " + "; ".join(ext)
+                     + ". Treat these maxima as extrapolations.")
+    else:
+        parts.append("No maximum requires extrapolation (leverage below the largest design leverage).")
+    for a in AGES:
+        A = R[a]
+        co = pd.DataFrame(A["coef"]).set_index("column")
+        why = []
+        if "D2" not in A["final_terms"] and any(o["SS"] in (0.0, 75.0) for o in A["optimum"]):
+            why.append("SS (no SS² term)")
+        if "C" in A["final_terms"] and any(o["AB"] in (0.42, 0.48) for o in A["optimum"]):
+            why.append("A/B (" + ("A/B² is positive, so A/B has a minimum inside the range" if "C2" in co.index and co.loc["C2", "coef"] > 0
+                                  else "no A/B curvature") + ")")
+        if why:
+            parts.append(f"The {a}-day maximum sits at the edge of the range of " + " and ".join(why) + ".")
+    return " ".join(parts)
+
+
 def main():
     R = load()
     K = {a: age_numbers(R[a]) for a in AGES}
@@ -346,15 +395,11 @@ def main():
 
     # ---------------------------------------------------------------- model cards
     cards = []
-    ad28 = pd.DataFrame(R["28"]["added_terms"])
-    carb_p28 = float(ad28[ad28.term.isin(["Carb", "KA", "KD", "KC"])].p.min())
     notes = {
         "7": (f"All selection criteria agree (AICc, BIC, backward elimination at α = 0.10 and 0.05). The carbonation terms are kept in "
               f"{pct(R['7']['bootstrap']['resid']['inclusion']['KD'])} of residual-bootstrap re-selections but in "
               f"{pct(R['7']['bootstrap']['subsample']['inclusion']['KD'])} of subsamples of 24 mixtures, because they rest on the 8 uncarbonated mixtures."),
-        "28": (f"SS is the only robust term. A/B depends on mix 7 and RCF² on mix 14: each drops out when that mixture is removed. "
-               f"No carbonation term is detected (best added-term {pe(carb_p28)}). "
-               f"Predictions for a new mixture are much less precise than at 7 days."),
+        "28": note28(R),
     }
     for a in AGES:
         A = R[a]; k = K[a]
@@ -436,7 +481,7 @@ def main():
 <section id="trends">
   <h2>Trends side by side</h2>
   <p>The same quantities computed from each model. Ratios compare two predicted strengths with 95 % CIs; a ratio of 1 with no interval means the term behind it is not in that model. A/B is held at 0.45 unless stated.</p>
-  <p class="note">The grey "supplementary" columns are not part of either model. They refit one age's data with the other model's terms, so you can see what the omitted effects look like, with their uncertainty, when they are forced in. * 75 % (edge): the 28-day model has no SS² term, so strength rises to the highest SS tested.</p>
+  <p class="note">The grey "supplementary" columns are not part of either model. They refit one age's data with the other model's terms, so you can see what the omitted effects look like, with their uncertainty, when they are forced in. {"* 75 % (edge): the 28-day model has no SS² term, so strength rises to the highest SS tested." if "D2" not in A28["final_terms"] else ""}</p>
   <h3>SS</h3>
   {ss_tab}
   <figure class="plate"><img src="figures/H03_strength_vs_SS_both_models.png" alt="Predicted strength against SS from both models" loading="lazy"></figure>
@@ -452,7 +497,7 @@ def main():
   <p>Strength at A/B 0.42 relative to 0.48 (RCF 30 %, SS 37.5 %, NC): 7-day model {T['ab']['7']}; 28-day model {T['ab']['28']}. Supplementary: the 7-day data refitted with the 28-day terms give {T['ab_xf7']}.</p>
   <h3>Best combination per carbonation level</h3>
   {opt_tab}
-  <p class="note">Maximum of the median prediction over RCF 10–50 %, SS 0–75 % and, where A/B is in the model, A/B 0.42–0.48. No maximum requires extrapolation (leverage below the largest design leverage). The 28-day maximum sits at the edge of the SS and A/B ranges because the 28-day model has no SS or A/B curvature.</p>
+  <p class="note">Maximum of the median prediction over RCF 10–50 %, SS 0–75 % and, where A/B is in the model, A/B 0.42–0.48. {opt_note(R)}</p>
   <figure class="plate"><img src="figures/H06_response_surfaces_both_models.png" alt="Response surfaces of both models" loading="lazy"></figure>
 </section>
 
@@ -612,6 +657,8 @@ Cross-checks: {'; '.join(f"{kk.replace('_', ' ')}: {', '.join(TXT.get(t, t) for 
 
 {md_table(T['opt'], ['carb', 'w7', 'f7', 'pi7', 'w28', 'f28', 'pi28'], ['Carbonation', '7 d at', '7 d median [CI]', '7 d PI', '28 d at', '28 d median [CI]', '28 d PI'])}
 
+{opt_note(R)}
+
 ## Files
 
 `analysis/run_separate.py`, `analysis/make_figures_separate.py`, `analysis/report_separate.py`; results in `results/separate/`
@@ -640,7 +687,7 @@ def build_pdf(R, K, cards_html, ts_tab, ss_tab, rcf_tab, carb_tab, dur_tab, opt_
 <h3>Carbonation duration</h3>{dur_tab}
 <p>A/B 0.42 / 0.48: 7-day model {T['ab']['7']}; 28-day model {T['ab']['28']}.</p>
 <div class="fig"><img src="{fig}/H05_effect_ratios_both_models.png"></div>
-<h3>Best combination per carbonation level</h3>{opt_tab}
+<h3>Best combination per carbonation level</h3>{opt_tab}<p class="small">{opt_note(R)}</p>
 <div class="fig"><img src="{fig}/H06_response_surfaces_both_models.png"></div>
 <h2>Validation</h2>
 <div class="fig"><img src="{fig}/H07_observed_vs_predicted_both_models.png"></div>

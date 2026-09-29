@@ -140,6 +140,8 @@ def main():
     with open(os.path.join(dz.ROOT, "results", "separate", "separate_results.json")) as f:
         R_sep = json.load(f)
     pred = {a: R_sep[a]["fit"]["predR2"] for a in ("7", "28")}
+    nc28 = pd.DataFrame(R_sep["28"]["nested_cv"])
+    ncv28 = f"{nc28[(nc28.cv == 'leave-one-mixture-out') & (nc28.procedure == 'AICc (primary)')].predR2.iloc[0]:.2f}".replace("-", "−")
 
     def pairs_txt(k):
         """Non-zero interaction pairs of a model, largest first, as 'SS × Carbonation (0.123)' (full pair effect)."""
@@ -151,14 +153,16 @@ def main():
     def model_point(k):
         rk = ranked(R, k)
         top, rest = rk[0], rk[1:]
-        s = (f"{top[0]} contributes most (mean |SHAP| {top[1]:.2f} on the ln scale, about {impM[k][top[0]]:.1f} MPa; ranked first in "
+        lead = "contributes most" if first[k][top[0]] >= 0.5 else "is marginally first, but no input clearly dominates"
+        s = (f"{top[0]} {lead} (mean |SHAP| {top[1]:.2f} on the ln scale, about {impM[k][top[0]]:.1f} MPa; ranked first in "
              f"{100 * first[k][top[0]]:.0f} % of refits)")
         if rest:
-            s += ", followed by " + ", ".join(f"{fn} ({m:.2f})" for fn, m in rest)
+            lst = [f"{fn} ({m:.2f})" for fn, m in rest]
+            s += ", followed by " + (", ".join(lst[:-1]) + " and " + lst[-1] if len(lst) > 1 else lst[0])
         s += "."
         pr = pairs_txt(k)
         if pr:
-            s += " Largest interaction: " + "; ".join(f"{p} ({v:.3f} for the pair)" for p, v in pr[:3]) + "."
+            s += (" Largest interaction: " if len(pr) == 1 else " Largest interactions: ") + "; ".join(f"{p} ({v:.3f} for the pair)" for p, v in pr[:3]) + "."
         else:
             s += " The model has no interaction terms, so every interaction value is zero."
         z = [fn for fn, m in zip(R[k]["features"], R[k]["ln"]["mean_abs"]) if m < 1e-12]
@@ -182,7 +186,7 @@ def main():
     method = f"""
 <p>SHAP values here are exact interventional Shapley values of each fitted model, computed over all coalitions of its inputs (16 for four inputs, 32 with curing age) with the 30 real mixtures as the background set (60 mixture × age rows for the paired model). No sampling approximation is involved. The inputs are the actual model inputs: RCF (%), SS (%), A/B and carbonation. Carbonation is one categorical input with four levels (NC, 0.5 h, 1 h, 5 h). When it is absent from a coalition its level is taken from a background mixture, so its level indicators and its carbonated × RCF and carbonated × SS terms always move together. It is never treated as a number. The paired model adds curing age (7 or 28 d) as a fifth input. SHAP interaction values follow Lundberg et al. (2020).</p>
 <p>Values are computed on the ln-strength scale, where the models were fitted. On that scale the contributions add up exactly and the interaction values correspond one-to-one to the models' interaction terms. Axes also show the multiplicative factor exp(SHAP). The waterfalls and the supplementary figures use the MPa scale (median prediction). Checks: every decomposition satisfies Shapley efficiency to machine precision. {xcheck}{analytic} Importance intervals come from 1,000 case-bootstrap refits stratified by carbonation level ({R['paired']['n_boot']} usable for the paired model).</p>
-<p class="note">SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² {pred['28']:.2f} vs {pred['7']:.2f}), so its SHAP pattern is less certain.</p>"""
+<p class="note">SHAP describes how each fitted model uses its inputs, not causal effects. An input a model does not contain gets exactly zero. The values depend on the background set (here the design itself), and the 28-day model predicts new mixtures much less precisely than the 7-day model (predicted R² of the fixed terms {pred['28']:.2f} vs {pred['7']:.2f}; {ncv28} for the 28-day model when its selection is repeated in each fold), so its SHAP pattern is less certain.</p>"""
 
     body = f"""
 <header class="top">

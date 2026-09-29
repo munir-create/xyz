@@ -200,7 +200,7 @@ def fig_gain(R, d):
     ax.minorticks_off()
     ax.set_xlim(-2, 77)
     ax.set_xlabel("Sodium silicate, SS (%)"); ax.set_ylabel("Strength gain  f28 / f7")
-    ax.set_title("7 → 28-day strength gain depends on SS only", loc="left")
+    ax.set_title("7 → 28-day strength gain against SS (the only age term selected)", loc="left")
     ax.legend(fontsize=6.6, loc="upper left", bbox_to_anchor=(1.01, 1.0))
     fig.tight_layout()
     save(fig, "F03_gain_ratio_vs_SS")
