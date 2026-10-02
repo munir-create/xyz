@@ -1,0 +1,57 @@
+scheme,age_d,term,label,in_final,freq
+residual bootstrap,7,A,RCF,True,1.0
+residual bootstrap,7,C,A/B,False,0.1265
+residual bootstrap,7,D,SS,True,1.0
+residual bootstrap,7,Carb,Carb,True,0.8805
+residual bootstrap,7,AC,RCF·A/B,False,0.02
+residual bootstrap,7,AD,RCF·SS,True,0.7125
+residual bootstrap,7,CD,A/B·SS,False,0.02
+residual bootstrap,7,A2,RCF²,False,0.0705
+residual bootstrap,7,C2,(A/B)²,False,0.025
+residual bootstrap,7,D2,SS²,True,1.0
+residual bootstrap,7,KA,K·RCF,True,0.724
+residual bootstrap,7,KC,K·A/B,False,0.0185
+residual bootstrap,7,KD,K·SS,True,0.872
+residual bootstrap,7,EXACT,exact final model,True,0.376
+residual bootstrap,28,A,RCF,True,0.89
+residual bootstrap,28,C,A/B,True,0.8645
+residual bootstrap,28,D,SS,True,0.997
+residual bootstrap,28,Carb,Carb,True,0.742
+residual bootstrap,28,AC,RCF·A/B,False,0.062
+residual bootstrap,28,AD,RCF·SS,False,0.0825
+residual bootstrap,28,CD,A/B·SS,False,0.076
+residual bootstrap,28,A2,RCF²,True,0.6835
+residual bootstrap,28,C2,(A/B)²,True,0.538
+residual bootstrap,28,D2,SS²,False,0.1055
+residual bootstrap,28,KA,K·RCF,False,0.0645
+residual bootstrap,28,KC,K·A/B,False,0.067
+residual bootstrap,28,KD,K·SS,False,0.0765
+residual bootstrap,28,EXACT,exact final model,True,0.227
+subsample 24/30,7,A,RCF,True,1.0
+subsample 24/30,7,C,A/B,False,0.028
+subsample 24/30,7,D,SS,True,1.0
+subsample 24/30,7,Carb,Carb,True,0.514
+subsample 24/30,7,AC,RCF·A/B,False,0.019
+subsample 24/30,7,AD,RCF·SS,True,0.601
+subsample 24/30,7,CD,A/B·SS,False,0.003
+subsample 24/30,7,A2,RCF²,False,0.099
+subsample 24/30,7,C2,(A/B)²,False,0.002
+subsample 24/30,7,D2,SS²,True,1.0
+subsample 24/30,7,KA,K·RCF,True,0.368
+subsample 24/30,7,KC,K·A/B,False,0.0
+subsample 24/30,7,KD,K·SS,True,0.498
+subsample 24/30,7,EXACT,exact final model,True,0.189
+subsample 24/30,28,A,RCF,True,0.548
+subsample 24/30,28,C,A/B,True,0.702
+subsample 24/30,28,D,SS,True,0.992
+subsample 24/30,28,Carb,Carb,True,0.292
+subsample 24/30,28,AC,RCF·A/B,False,0.029
+subsample 24/30,28,AD,RCF·SS,False,0.017
+subsample 24/30,28,CD,A/B·SS,False,0.015
+subsample 24/30,28,A2,RCF²,True,0.403
+subsample 24/30,28,C2,(A/B)²,True,0.224
+subsample 24/30,28,D2,SS²,False,0.132
+subsample 24/30,28,KA,K·RCF,False,0.013
+subsample 24/30,28,KC,K·A/B,False,0.047
+subsample 24/30,28,KD,K·SS,False,0.065
+subsample 24/30,28,EXACT,exact final model,True,0.111

@@ -1,0 +1,13 @@
+08:11:47 data revision log
+08:11:47 per-age exhaustive AICc selection
+08:11:51 final terms 7 d ['A', 'D', 'Carb', 'AD', 'D2', 'KA', 'KD']; 28 d ['A', 'C', 'D', 'Carb', 'A2', 'C2']
+08:12:23 strategy comparison: AICc on the joint likelihood
+08:12:24 strategy comparison: nested cross-validation
+08:13:48 final bivariate model
+08:13:57 effects at 7 d vs 28 d
+08:14:05 trends, interactions, gain, optima
+08:14:10 design-point influence
+08:14:17 resampling: 2000 residual-pair bootstrap, 1000 subsamples (24/30)
+08:15:46 sensitivity analyses
+08:16:32 done in 285 s -> results/v3/v3_results.json
+exit 0

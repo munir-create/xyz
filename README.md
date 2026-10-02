@@ -4,6 +4,11 @@ Reproducible analysis of the corrected 7- and 28-day compressive strengths of 30
 model covers both curing ages: curing age is a two-level factor, carbonation a four-level factor (NC, 0.5, 1, 5 h),
 and the paired 7/28-day results of each mixture share a random mixture effect with age-specific residual variance.
 
+> **Latest: revised data (v3).** The strengths were revised (`data/source/30_mixes_strength_results_noiseless.pdf`) and are
+> modelled with one bivariate model whose 7- and 28-day equations have their own terms: [`report/v3/`](report/v3/REPORT.md)
+> (`REPORT.md`, `index.html` with a strength calculator, `Model_Report_v3.pdf`). The headline results below are for the
+> previous data set (v2).
+
 ## Headline results
 
 * Final model (exhaustive AICc search over 53,105 hierarchical models, both covariance structures):
@@ -69,6 +74,17 @@ four levels (NC, 0.5 h, 1 h, 5 h). Importance intervals come from 1,000 stratifi
 Outputs: `results/shap/` (JSON, tables, figures `Z01–Z08b`) and `report/shap/` (`index.html`, `SHAP_Figures.pdf`,
 `SHAP_NOTES.md`). Run `python analysis/run_shap.py`, `python analysis/make_figures_shap.py`,
 `python analysis/report_shap.py`. The optional cross-check against the `shap` package (0.51.0) runs only when it is installed.
+
+## Revised data (v3): bivariate model with age-specific terms
+
+`analysis/run_v3.py` models `data/strength_7d_28d_v3_noiseless.csv` (programmatic transcription of the revised table).
+Each curing age has its own regression equation, chosen by exhaustive AICc over the 716 hierarchical single-age models,
+and the two equations are estimated together by REML/GLS with an unstructured 7/28-day covariance (`analysis/bivariate.py`).
+On the revised data this beats the shared-effects paired model on AICc and in nested cross-validation, mainly at 28 days.
+`results/v3/tables/V00_revision_log_v2_to_v3.csv` lists every revised value; several revisions cannot come from removing
+specimens (report, Section 1) and need documenting before publication.
+Outputs: `results/v3/` (JSON, tables `V00–V23`, figures `G01–G09`) and `report/v3/` (`REPORT.md`, `index.html`,
+`Model_Report_v3.pdf`). Run `python analysis/run_v3.py`, `python analysis/make_figures_v3.py`, `python analysis/report_v3.py`.
 
 ## Relation to the earlier 7-day model
 

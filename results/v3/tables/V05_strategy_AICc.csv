@@ -1,0 +1,5 @@
+model,struct,AICc,k,terms,dAICc
+"Bivariate, age-specific terms (final)",UN,-0.8784322361879511,22.0,7 d: A D Carb AD D2 KA KD | 28 d: A C D Carb A2 C2,0.0
+"Same terms, pairing ignored (independent ages)",INDH,0.6053830681881927,21.0,as final,1.4838153043761437
+"Shared-effects paired model, AICc-best (UN)",UN,3.922280213427987,,A D Carb AD D2 KA KD Age D.Age D2.Age,4.800712449615938
+"Shared-effects paired model, AICc-best (CS)",CS,9.367935882263078,,A C D Carb AD A2 C2 D2 KD Age D.Age D2.Age,10.246368118451029
